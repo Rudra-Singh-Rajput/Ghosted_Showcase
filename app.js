@@ -1,581 +1,301 @@
-// Ghosted Client-side Sync Engine (with Interactive Canvas Particles & 3D Tilt)
-const urlParams = new URLSearchParams(window.location.search);
-const serverParam = urlParams.get('server');
+// Ghosted Experimental High-Impact 3D UI Showcase Engine
 
-let socket;
-let isOfflineMode = false;
+// --- SECTION 1: 3D ASCII TORUS KNOT MATH RENDERER (Terminal Style) ---
+const asciiContainer = document.getElementById('ascii-canvas-container');
+const preElement = document.createElement('pre');
+preElement.className = 'ascii-pre';
+asciiContainer.appendChild(preElement);
 
-// Check if socket.io is loaded, otherwise run in Offline Simulation Mode
-if (typeof io !== 'undefined') {
-    try {
-        socket = io(serverParam || undefined);
-    } catch (e) {
-        console.warn("Socket.io connection failed. Initializing in Offline Simulation Mode.", e);
-        isOfflineMode = true;
+let asciiA = 0;
+let asciiB = 0;
+let asciiMouseX = 0;
+let asciiMouseY = 0;
+
+// Track cursor movement on ascii card to rotate the torus
+document.getElementById('ascii-showcase').addEventListener('mousemove', (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    asciiMouseX = ((e.clientX - rect.left) / rect.width) * 4 - 2;
+    asciiMouseY = ((e.clientY - rect.top) / rect.height) * 4 - 2;
+});
+
+function renderAsciiFrame() {
+    const width = 60;
+    const height = 24;
+    const buffer = Array(width * height).fill(" ");
+    const zBuffer = Array(width * height).fill(0);
+
+    // Torus knot mathematical geometry calculations
+    // R1 = major radius, R2 = minor radius
+    const R1 = 1.3;
+    const R2 = 0.5;
+
+    // Shift angles over time and cursor values
+    asciiA += 0.02 + (asciiMouseX * 0.01);
+    asciiB += 0.01 + (asciiMouseY * 0.01);
+
+    const cosA = Math.cos(asciiA);
+    const sinA = Math.sin(asciiA);
+    const cosB = Math.cos(asciiB);
+    const sinB = Math.sin(asciiB);
+
+    for (let theta = 0; theta < 2 * Math.PI; theta += 0.07) {
+        const cosTheta = Math.cos(theta);
+        const sinTheta = Math.sin(theta);
+
+        for (let phi = 0; phi < 2 * Math.PI; phi += 0.02) {
+            const cosPhi = Math.cos(phi);
+            const sinPhi = Math.sin(phi);
+
+            // Compute torus coordinates
+            const circleX = R1 + R2 * cosTheta;
+            const circleY = R2 * sinTheta;
+
+            // 3D rotations
+            const x = circleX * (cosB * cosPhi + sinA * sinB * sinPhi) - circleY * cosA * sinB;
+            const y = circleX * (sinB * cosPhi - sinA * cosB * sinPhi) + circleY * cosA * cosB;
+            const z = cosA * circleX * sinPhi + circleY * sinA;
+            const ooz = 1 / (z + 4); // one over z
+
+            // Screen projection coordinates
+            const xp = Math.floor(width / 2 + 30 * ooz * x * 1.5);
+            const yp = Math.floor(height / 2 + 15 * ooz * y);
+
+            if (xp >= 0 && xp < width && yp >= 0 && yp < height) {
+                const idx = xp + yp * width;
+                // Luminance/brightness computation for character mapping
+                const L = cosPhi * cosTheta * sinB - cosA * cosTheta * sinPhi - sinA * sinTheta + cosB * (cosA * sinTheta - sinA * cosTheta * sinPhi);
+                
+                if (ooz > zBuffer[idx]) {
+                    zBuffer[idx] = ooz;
+                    const charIndex = Math.floor(Math.max(0, L) * 8);
+                    const chars = ".,-~:;=!*#$@";
+                    buffer[idx] = chars[charIndex] || " ";
+                }
+            }
+        }
     }
-} else {
-    console.warn("Socket.io is not loaded. Initializing in Offline Simulation Mode.");
-    isOfflineMode = true;
-}
 
-// State
-let player;
-let roomId = '';
-let nickname = '';
-let myId = 'spirit_' + Math.floor(Math.random() * 1000);
-let isInternalChange = false;
-let currentVideoId = 'J---aiyznGQ'; // Default: Ghosted Ambient Vibe
-let queue = [];
-let myRole = 'spirit';
-let activeRooms = [
-    { id: 'VOID-7', name: 'CAMPUS CORNER', genre: 'General Chat', pilots: [{ name: '@wraith-8' }, { name: '@phantom-2' }] },
-    { id: 'DELTA-9', name: 'LATE NIGHT CODERS', genre: 'Sprints', pilots: [{ name: '@coder-x' }] }
+    // Convert flat buffer array to multiline text string
+    let output = "";
+    for (let k = 0; k < width * height; k++) {
+        output += buffer[k];
+        if (k % width === width - 1) output += "\n";
+    }
+    preElement.textContent = output;
+    requestAnimationFrame(renderAsciiFrame);
+}
+renderAsciiFrame();
+
+
+// --- SECTION 2: MATTER.JS INTERACTIVE 2D PHYSICS SYSTEM ---
+const physicsContainer = document.getElementById('physics-canvas-container');
+const Engine = Matter.Engine,
+      Render = Matter.Render,
+      Runner = Matter.Runner,
+      Bodies = Matter.Bodies,
+      Composite = Matter.Composite,
+      Mouse = Matter.Mouse,
+      MouseConstraint = Matter.MouseConstraint;
+
+// Create Matter engine
+const engine = Engine.create({ gravity: { y: 0.8 } });
+const world = engine.world;
+
+// Create Renderer
+const renderWidth = physicsContainer.clientWidth || 440;
+const renderHeight = 280;
+
+const render = Render.create({
+    element: physicsContainer,
+    engine: engine,
+    options: {
+        width: renderWidth,
+        height: renderHeight,
+        background: 'transparent',
+        wireframes: false,
+        showAngleIndicator: false
+    }
+});
+Render.run(render);
+
+// Create runner
+const runner = Runner.create();
+Runner.run(runner, engine);
+
+// Add boundary walls
+const wallOptions = { isStatic: true, render: { visible: false } };
+const floor = Bodies.rectangle(renderWidth / 2, renderHeight + 10, renderWidth + 100, 20, wallOptions);
+const leftWall = Bodies.rectangle(-10, renderHeight / 2, 20, renderHeight + 100, wallOptions);
+const rightWall = Bodies.rectangle(renderWidth + 10, renderHeight / 2, 20, renderHeight + 100, wallOptions);
+const ceiling = Bodies.rectangle(renderWidth / 2, -10, renderWidth + 100, 20, wallOptions);
+Composite.add(world, [floor, leftWall, rightWall, ceiling]);
+
+// Callsign pill labels mapping
+const pillData = [
+    { text: "@spectre", color: "#BD00FF" },
+    { text: "@seer-88", color: "#FF8700" },
+    { text: "@wraith", color: "#00FFFF" },
+    { text: "Level 12", color: "#FF8700" },
+    { text: "@phantom", color: "#BD00FF" },
+    { text: "VOID", color: "#00FFFF" }
 ];
 
-// DOM Elements
-const landingPage = document.getElementById('landing-page');
-const appPage = document.getElementById('app-page');
-const reactionsContainer = document.getElementById('reactions-container');
-const reactionPanel = document.getElementById('reaction-panel');
-const reactionToggle = document.getElementById('reaction-toggle');
-const pilotsList = document.getElementById('pilots-list');
-const searchResultsOverlay = document.getElementById('search-results-overlay');
-const searchResultsList = document.getElementById('search-results-list');
-const searchVideoBtn = document.getElementById('search-video-btn');
-const copyLinkBtn = document.getElementById('copy-link-btn');
-
-// Inputs
-const nicknameInput = document.getElementById('nickname-input');
-const roomIdInput = document.getElementById('room-id-input');
-const spaceNameInput = document.getElementById('space-name-input');
-const spaceGenreInput = document.getElementById('space-genre-input');
-const spaceAccessSelect = document.getElementById('space-access-select');
-const pinInputContainer = document.getElementById('pin-input-container');
-const spacePinInput = document.getElementById('space-pin-input');
-const videoUrlInput = document.getElementById('video-url-input');
-const chatInput = document.getElementById('chat-input');
-
-// Buttons
-const createRoomBtn = document.getElementById('create-room-btn');
-const joinRoomBtn = document.getElementById('join-room-btn');
-const sendMsgBtn = document.getElementById('send-msg-btn');
-const changeVideoBtn = document.getElementById('change-video-btn');
-const addQueueBtn = document.getElementById('add-queue-btn');
-const themeToggle = document.getElementById('theme-toggle');
-const leaveRoomBtn = document.getElementById('leave-room-btn');
-const discoverBtn = document.getElementById('discover-btn');
-
-// Overlays & Badges
-const currentRoomDisplay = document.getElementById('current-room-display');
-const userDisplay = document.getElementById('user-display');
-const chatMessages = document.getElementById('chat-messages');
-const queueList = document.getElementById('queue-list');
-const invitationBadge = document.getElementById('invitation-badge');
-const invitationText = document.getElementById('invitation-text');
-const discoverOverlay = document.getElementById('discover-overlay');
-const closeDiscoverBtn = document.getElementById('close-discover-btn');
-const activeRoomsList = document.getElementById('active-rooms-list');
-const pinPromptOverlay = document.getElementById('pin-prompt-overlay');
-const promptPinInput = document.getElementById('prompt-pin-input');
-const pinErrorMsg = document.getElementById('pin-error-msg');
-const submitPinBtn = document.getElementById('submit-pin-btn');
-const cancelPinBtn = document.getElementById('cancel-pin-btn');
-const toastNotification = document.getElementById('toast-notification');
-const toastMessage = document.getElementById('toast-message');
-
-// Tab links
-const tabJoinLink = document.getElementById('tab-join-link');
-const tabCreateLink = document.getElementById('tab-create-link');
-const tabJoinContent = document.getElementById('tab-join-content');
-const tabCreateContent = document.getElementById('tab-create-content');
-
-// --- THEME MANAGEMENT ---
-const savedTheme = localStorage.getItem('ghostedTheme') || 'dark';
-if (savedTheme === 'light') {
-    document.body.classList.add('light-mode');
-    themeToggle.textContent = '☀️';
-}
-
-themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('light-mode');
-    const isLight = document.body.classList.contains('light-mode');
-    themeToggle.textContent = isLight ? '☀️' : '🌙';
-    localStorage.setItem('ghostedTheme', isLight ? 'light' : 'dark');
-});
-
-// --- TABS CONTROL ---
-tabJoinLink.addEventListener('click', () => {
-    tabJoinLink.classList.add('active');
-    tabCreateLink.classList.remove('active');
-    tabJoinContent.classList.add('active');
-    tabCreateContent.classList.remove('active');
-});
-
-tabCreateLink.addEventListener('click', () => {
-    tabCreateLink.classList.add('active');
-    tabJoinLink.classList.remove('active');
-    tabCreateContent.classList.add('active');
-    tabJoinContent.classList.remove('active');
-});
-
-// --- INVITES ---
-window.addEventListener('load', () => {
-    const params = new URLSearchParams(window.location.search);
-    const roomParam = params.get('room');
-    const nameParam = params.get('name');
+// Spawn dynamic pills with collision bodies
+pillData.forEach((pill, idx) => {
+    const x = Math.random() * (renderWidth - 100) + 50;
+    const y = Math.random() * 100 + 30;
     
-    if (nameParam) {
-        nicknameInput.value = decodeURIComponent(nameParam);
-    }
-    
-    if (roomParam) {
-        roomIdInput.value = roomParam.trim().toUpperCase();
-        invitationBadge.classList.remove('hidden');
-        invitationText.textContent = `🚀 INVITATION DETECTED: ACCESSING ROOM CODE [ ${roomParam} ]`;
-    }
-});
-
-// --- TOAST NOTIFICATIONS ---
-function showToast(message) {
-    toastMessage.textContent = message;
-    toastNotification.classList.remove('hidden');
-    setTimeout(() => {
-        toastNotification.classList.add('hidden');
-    }, 3000);
-}
-
-// --- ACCESS CONTROL GATES ---
-spaceAccessSelect.addEventListener('change', (e) => {
-    if (e.target.value === 'private') {
-        pinInputContainer.classList.remove('hidden');
-    } else {
-        pinInputContainer.classList.add('hidden');
-    }
-});
-
-// --- REACTION PANEL ---
-reactionToggle.addEventListener('click', () => {
-    reactionPanel.classList.toggle('collapsed');
-    reactionToggle.textContent = reactionPanel.classList.contains('collapsed') ? '❯' : '❮';
-});
-
-// Setup click on reaction emojis
-document.querySelectorAll('.reaction-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const emoji = btn.getAttribute('data-emoji');
-        sendReaction(emoji);
-    });
-});
-
-function sendReaction(emoji) {
-    if (isOfflineMode) {
-        triggerFloatingEmoji(emoji);
-    } else if (socket) {
-        socket.emit('reaction', { roomId, emoji });
-    }
-}
-
-function triggerFloatingEmoji(emoji) {
-    const container = document.getElementById('reactions-container');
-    const el = document.createElement('div');
-    el.className = 'floating-emoji';
-    el.textContent = emoji;
-    
-    const leftOffset = Math.random() * 80 + 10;
-    el.style.left = `${leftOffset}%`;
-    el.style.bottom = '10px';
-    
-    container.appendChild(el);
-    setTimeout(() => el.remove(), 2500);
-}
-
-// --- OFFLINE SIMULATION FUNCTIONS ---
-function runOfflineModeInit() {
-    nickname = nicknameInput.value.trim() || 'Spirit_' + Math.floor(Math.random() * 100);
-    landingPage.classList.add('hidden');
-    appPage.classList.remove('hidden');
-    
-    roomId = roomIdInput.value.trim().toUpperCase() || 'DEMO-VOID';
-    currentRoomDisplay.textContent = roomId;
-    userDisplay.textContent = nickname;
-
-    showToast("CONNECTED IN SIMULATION MODE");
-    setupYoutubePlayer(currentVideoId);
-    updatePilotsList([{ id: myId, name: nickname, role: 'host' }]);
-}
-
-// --- YouTube Player Config ---
-function setupYoutubePlayer(videoId) {
-    if (player && typeof player.loadVideoById === 'function') {
-        player.loadVideoById(videoId);
-        return;
-    }
-    
-    player = new YT.Player('player', {
-        height: '100%',
-        width: '100%',
-        videoId: videoId,
-        playerVars: {
-            'playsinline': 1,
-            'controls': 1,
-            'autoplay': 1,
-            'rel': 0
-        },
-        events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
+    // Create box body
+    const pBody = Bodies.rectangle(x, y, 90, 36, {
+        chamfer: { radius: 18 },
+        restitution: 0.7,
+        friction: 0.05,
+        render: {
+            fillStyle: 'rgba(20, 20, 25, 0.85)',
+            strokeStyle: pill.color,
+            lineWidth: 1.5,
+            text: {
+                content: pill.text,
+                color: '#ffffff',
+                size: 11,
+                family: 'Outfit'
+            }
         }
     });
-}
+    Composite.add(world, pBody);
+});
 
-function onPlayerReady(event) {
-    event.target.playVideo();
-}
+// Custom text rendering pass for Matter.js shapes
+const canvasElement = physicsContainer.querySelector('canvas');
+const ctx2d = canvasElement.getContext('2d');
 
-function onPlayerStateChange(event) {
-    if (isOfflineMode) return;
-    
-    if (!isInternalChange && socket) {
-        const state = event.data;
-        const time = player.getCurrentTime();
-        socket.emit('state-change', { roomId, state, time });
-    }
-}
-
-// --- BUTTON TRIGGERS ---
-joinRoomBtn.addEventListener('click', () => {
-    if (isOfflineMode) {
-        runOfflineModeInit();
-        return;
-    }
-    
-    nickname = nicknameInput.value.trim();
-    const targetRoom = roomIdInput.value.trim().toUpperCase();
-    if (!nickname || !targetRoom) return alert("Nickname and Target Room ID are required!");
-
-    socket.emit('join-room', { roomId: targetRoom, nickname }, (res) => {
-        if (res.status === 'success') {
-            roomId = targetRoom;
-            landingPage.classList.add('hidden');
-            appPage.classList.remove('hidden');
-            currentRoomDisplay.textContent = roomId;
-            userDisplay.textContent = nickname;
-            setupYoutubePlayer(res.videoId || currentVideoId);
-        } else if (res.status === 'pin-required') {
-            pinPromptOverlay.classList.remove('hidden');
-        } else {
-            alert(res.message);
+Matter.Events.on(render, 'afterRender', () => {
+    const bodies = Composite.allBodies(world);
+    ctx2d.save();
+    bodies.forEach(body => {
+        if (body.render.text) {
+            ctx2d.translate(body.position.x, body.position.y);
+            ctx2d.rotate(body.angle);
+            ctx2d.fillStyle = "#ffffff";
+            ctx2d.font = "800 11px Outfit";
+            ctx2d.textAlign = "center";
+            ctx2d.textBaseline = "middle";
+            ctx2d.fillText(body.render.text.content, 0, 0);
+            ctx2d.rotate(-body.angle);
+            ctx2d.translate(-body.position.x, -body.position.y);
         }
     });
+    ctx2d.restore();
 });
 
-createRoomBtn.addEventListener('click', () => {
-    if (isOfflineMode) {
-        runOfflineModeInit();
-        return;
+// Add cursor dragging/tossing constraint
+const mouse = Mouse.create(render.canvas);
+const mouseConstraint = MouseConstraint.create(engine, {
+    mouse: mouse,
+    constraint: {
+        stiffness: 0.2,
+        render: { visible: false }
     }
-
-    nickname = nicknameInput.value.trim();
-    const spaceName = spaceNameInput.value.trim() || 'Void Galaxy';
-    const access = spaceAccessSelect.value;
-    const pin = spacePinInput.value.trim();
-
-    if (!nickname) return alert("Nickname callsign is required!");
-
-    socket.emit('create-room', { nickname, spaceName, access, pin }, (res) => {
-        if (res.status === 'success') {
-            roomId = res.roomId;
-            landingPage.classList.add('hidden');
-            appPage.classList.remove('hidden');
-            currentRoomDisplay.textContent = roomId;
-            userDisplay.textContent = nickname;
-            setupYoutubePlayer(currentVideoId);
-        } else {
-            alert(res.message);
-        }
-    });
 });
+Composite.add(world, mouseConstraint);
+render.mouse = mouse;
 
-sendMsgBtn.addEventListener('click', sendMsg);
-chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMsg();
-});
+// Let users click inside canvas to drop new pills
+physicsContainer.addEventListener('click', (e) => {
+    // Avoid spawning pills if dragging an existing body
+    if (mouseConstraint.body) return;
+    
+    const rect = physicsContainer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-function sendMsg() {
-    const text = chatInput.value.trim();
-    if (!text) return;
-
-    if (isOfflineMode) {
-        appendMessage(nickname, text, true);
-        chatInput.value = '';
+    if (x >= 0 && x <= renderWidth && y >= 0 && y <= renderHeight) {
+        const labels = ["RESONANCE", "ANONYMOUS", "@ghoul", "@veil", "SOUL", "GHOSTED"];
+        const colors = ["#BD00FF", "#00FFFF", "#FF8700"];
         
-        setTimeout(() => {
-            const replies = [
-                "I agree, that fits the vibe perfectly.",
-                "Wait, is this video decaying too?",
-                "This synchronization is super fluid!",
-                "Spectral mode feels amazing."
-            ];
-            const rand = replies[Math.floor(Math.random() * replies.length)];
-            appendMessage("@wraith-8", rand, false);
-        }, 1200);
-    } else if (socket) {
-        socket.emit('chat-message', { roomId, message: text });
-        chatInput.value = '';
-    }
-}
-
-function appendMessage(sender, text, isMe) {
-    const bubble = document.createElement('div');
-    bubble.className = `message-bubble ${isMe ? 'outgoing' : 'incoming'}`;
-    bubble.innerText = text;
-
-    const meta = document.createElement('div');
-    meta.className = 'msg-meta';
-    meta.innerText = `${sender.toUpperCase()} • JUST NOW`;
-
-    chatMessages.appendChild(bubble);
-    chatMessages.appendChild(meta);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-changeVideoBtn.addEventListener('click', () => {
-    const url = videoUrlInput.value.trim();
-    if (!url) return;
-    
-    const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/);
-    const videoId = match ? match[1] : url;
-
-    if (isOfflineMode) {
-        setupYoutubePlayer(videoId);
-        videoUrlInput.value = '';
-        showToast("PLAYING YOUTUBE VIDEO LINK");
-    } else if (socket) {
-        socket.emit('change-video', { roomId, videoId });
-        videoUrlInput.value = '';
-    }
-});
-
-searchVideoBtn.addEventListener('click', () => {
-    const query = videoUrlInput.value.trim();
-    if (!query) return;
-
-    const mockResults = [
-        { id: 'J---aiyznGQ', title: 'Ghosted Ambient Lofi Vibe', duration: '3:45', author: 'Lofi Records' },
-        { id: 'dQw4w9WgXcQ', title: 'Rick Astley - Never Gonna Give You Up', duration: '3:32', author: 'RickAstleyVEVO' },
-        { id: 'kJQP7kiw5Fk', title: 'Luis Fonsi - Despacito ft. Daddy Yankee', duration: '4:41', author: 'LuisFonsiVEVO' }
-    ];
-
-    displaySearchResults(mockResults);
-});
-
-function displaySearchResults(results) {
-    searchResultsList.innerHTML = '';
-    results.forEach(res => {
-        const item = document.createElement('div');
-        item.className = 'search-item';
-        item.innerHTML = `
-            <img class="search-thumb" src="https://img.youtube.com/vi/${res.id}/mqdefault.jpg">
-            <div class="search-info">
-                <h5>${res.title}</h5>
-                <p>${res.author} • ${res.duration}</p>
-            </div>
-        `;
-        item.addEventListener('click', () => {
-            if (isOfflineMode) {
-                setupYoutubePlayer(res.id);
-                searchResultsOverlay.classList.add('hidden');
-                videoUrlInput.value = '';
-            } else if (socket) {
-                socket.emit('change-video', { roomId, videoId: res.id });
-                searchResultsOverlay.classList.add('hidden');
-                videoUrlInput.value = '';
+        const randomLabel = labels[Math.floor(Math.random() * labels.length)];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        const newPill = Bodies.rectangle(x, y, 90, 36, {
+            chamfer: { radius: 18 },
+            restitution: 0.75,
+            friction: 0.05,
+            render: {
+                fillStyle: 'rgba(20, 20, 25, 0.85)',
+                strokeStyle: randomColor,
+                lineWidth: 1.5,
+                text: {
+                    content: randomLabel,
+                    color: '#ffffff',
+                    size: 11,
+                    family: 'Outfit'
+                }
             }
         });
-        searchResultsList.appendChild(item);
-    });
-    searchResultsOverlay.classList.remove('hidden');
-}
-
-document.addEventListener('click', (e) => {
-    if (!searchResultsOverlay.contains(e.target) && e.target !== searchVideoBtn && e.target !== videoUrlInput) {
-        searchResultsOverlay.classList.add('hidden');
+        Composite.add(world, newPill);
     }
 });
 
-copyLinkBtn.addEventListener('click', () => {
-    const link = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
-    navigator.clipboard.writeText(link).then(() => {
-        showToast("INVITATION LINK COPIED TO CLIPBOARD");
-    });
-});
 
-leaveRoomBtn.addEventListener('click', () => {
-    location.reload();
-});
+// --- SECTION 3: LIQUID GLASS DISTORTION EFFECT ---
+const refractionCard = document.querySelector('.refraction-target');
+const displacementMap = document.querySelector('#liquid-refraction-filter feDisplacementMap');
+const turbulence = document.querySelector('#liquid-refraction-filter feTurbulence');
 
-discoverBtn.addEventListener('click', () => {
-    activeRoomsList.innerHTML = '';
-    activeRooms.forEach(room => {
-        const row = document.createElement('div');
-        row.className = 'room-card';
-        row.innerHTML = `
-            <div class="room-card-info">
-                <h4>${room.name} (${room.id})</h4>
-                <p>GENRE: ${room.genre} • SPIRITS: ${room.pilots.length}</p>
-            </div>
-            <button class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem; margin:0;" onclick="joinDirect('${room.id}')">CONNECT</button>
-        `;
-        activeRoomsList.appendChild(row);
-    });
-    discoverOverlay.classList.remove('hidden');
-});
+let targetScale = 0;
+let currentScale = 0;
 
-closeDiscoverBtn.addEventListener('click', () => {
-    discoverOverlay.classList.add('hidden');
-});
-
-window.joinDirect = function(id) {
-    roomIdInput.value = id;
-    discoverOverlay.classList.add('hidden');
-    joinRoomBtn.click();
-};
-
-document.querySelectorAll('.tab-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-        document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-
-        link.classList.add('active');
-        const tabId = link.getAttribute('data-tab');
-        document.getElementById(`${tabId}-tab`).classList.remove('hidden');
-    });
-});
-
-function updatePilotsList(pilots) {
-    pilotsList.innerHTML = '';
-    pilots.forEach(p => {
-        const row = document.createElement('div');
-        row.className = 'pilot-row';
-        row.innerHTML = `
-            <span class="pilot-name">${p.name.toUpperCase()}</span>
-            <span class="pilot-role">${p.role === 'host' ? 'Host' : 'Viewer'}</span>
-        `;
-        pilotsList.appendChild(row);
-    });
-}
-
-// --- INTERACTIVE BACKGROUND STARS ENGINE ---
-const canvas = document.getElementById('particles-canvas');
-const ctx = canvas.getContext('2d');
-let stars = [];
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-class Star {
-    constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = Math.random() * 0.4 - 0.2;
-        this.speedY = Math.random() * 0.4 - 0.2;
-    }
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-    }
-    draw() {
-        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-    }
-}
-
-for (let i = 0; i < 75; i++) {
-    stars.push(new Star());
-}
-
-function animateStars() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    stars.forEach((star, index) => {
-        star.update();
-        star.draw();
-        
-        // Draw links between nearby stars
-        for (let j = index + 1; j < stars.length; j++) {
-            const other = stars[j];
-            const dist = Math.hypot(star.x - other.x, star.y - other.y);
-            if (dist < 100) {
-                ctx.strokeStyle = `rgba(189, 0, 255, ${0.15 - (dist / 100) * 0.15})`;
-                ctx.lineWidth = 0.5;
-                ctx.beginPath();
-                ctx.moveTo(star.x, star.y);
-                ctx.lineTo(other.x, other.y);
-                ctx.stroke();
-            }
-        }
-    });
-    requestAnimationFrame(animateStars);
-}
-animateStars();
-
-// --- 3D TILT EFFECT ON HERO CARD ---
-const tiltCard = document.getElementById('3d-hero-card');
-const wrapper = document.getElementById('hero-card-wrapper');
-
-if (wrapper && tiltCard) {
-    wrapper.addEventListener('mousemove', (e) => {
-        const rect = wrapper.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        
-        // Convert cursor offset to degrees rotation
-        const rotateX = -(y / rect.height) * 20; // max 20 degrees
-        const rotateY = (x / rect.width) * 20;
-        
-        tiltCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-    });
+refractionCard.addEventListener('mousemove', (e) => {
+    const rect = refractionCard.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     
-    wrapper.addEventListener('mouseleave', () => {
-        tiltCard.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
-    });
-}
+    // Scale intensity based on distance to center
+    const dx = x - rect.width / 2;
+    const dy = y - rect.height / 2;
+    const distance = Math.hypot(dx, dy);
+    
+    targetScale = Math.min(60, distance * 0.4);
+    
+    // Shift baseFrequency slightly for liquid dynamic ripple wave look
+    const freq = 0.015 + (distance * 0.0001);
+    turbulence.setAttribute('baseFrequency', freq.toFixed(4));
+    refractionCard.style.filter = "url(#liquid-refraction-filter)";
+});
 
-// --- SOCKET EVENTS ---
-if (socket) {
-    socket.on('room-update', (data) => {
-        updatePilotsList(data.pilots);
-    });
-    socket.on('state-change', (data) => {
-        if (!player) return;
-        isInternalChange = true;
-        const myTime = player.getCurrentTime();
-        if (Math.abs(myTime - data.time) > 1.5) {
-            player.seekTo(data.time, true);
+refractionCard.addEventListener('mouseleave', () => {
+    targetScale = 0;
+    refractionCard.style.filter = "none";
+});
+
+// Smoothly interpolate the scale of refraction map
+function animateLiquidRefraction() {
+    currentScale += (targetScale - currentScale) * 0.1;
+    displacementMap.setAttribute('scale', currentScale.toFixed(2));
+    requestAnimationFrame(animateLiquidRefraction);
+}
+animateLiquidRefraction();
+
+
+// --- SECTION 4: 3D PERSPECTIVE CARD COVER FLOW CYCLE ---
+let stackIndex = 1;
+function cycleStack() {
+    const deck = document.getElementById('deck-wrapper');
+    const cards = deck.querySelectorAll('.stack-card');
+    
+    stackIndex = (stackIndex + 1) % 3;
+    
+    cards.forEach((card, idx) => {
+        // Cycle active classes
+        card.className = 'stack-card';
+        
+        const pos = (idx - stackIndex + 3) % 3;
+        if (pos === 0) {
+            card.classList.add('card-1');
+        } else if (pos === 1) {
+            card.classList.add('card-2');
+        } else {
+            card.classList.add('card-3');
         }
-        if (data.state === YT.PlayerState.PLAYING) {
-            player.playVideo();
-        } else if (data.state === YT.PlayerState.PAUSED) {
-            player.pauseVideo();
-        }
-        isInternalChange = false;
-    });
-    socket.on('chat-message', (data) => {
-        appendMessage(data.sender, data.message, data.sender === nickname);
-    });
-    socket.on('reaction', (data) => {
-        triggerFloatingEmoji(data.emoji);
-    });
-    socket.on('change-video', (data) => {
-        setupYoutubePlayer(data.videoId);
-        showToast("SYNCED NEW VIDEO IN SPACE");
     });
 }

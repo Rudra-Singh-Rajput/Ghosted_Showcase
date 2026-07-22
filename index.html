@@ -3,229 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghosted | Anonymous Video Sync Experience</title>
+    <title>Ghosted | Interactive WebGL & 3D Showcase</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inconsolata:wght@700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 </head>
 <body>
-    <!-- Canvas for Interactive Stars/Particles -->
-    <canvas id="particles-canvas"></canvas>
-
-    <!-- Ambient Morphing Blobs -->
+    <!-- Morphing Ambient Blobs -->
     <div class="morph-blob blob-purple"></div>
     <div class="morph-blob blob-orange"></div>
     <div class="morph-blob blob-cyan"></div>
-    
+
     <!-- Theme Toggle -->
     <div id="theme-toggle" class="theme-toggle glass" title="Toggle System Mode">🌙</div>
 
-    <!-- Discover Spaces Overlay -->
-    <div id="discover-overlay" class="modal-overlay hidden">
-        <div class="modal-card glass">
-            <div class="modal-header">
-                <h3>🪐 ACTIVE VOID SPACES</h3>
-                <button id="close-discover-btn" class="icon-btn-close">✕</button>
-            </div>
-            <div class="modal-body">
-                <div id="active-rooms-list" class="rooms-grid">
-                    <p class="empty-msg">Scanning channels... No active spaces detected.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Password PIN Prompt Overlay -->
-    <div id="pin-prompt-overlay" class="modal-overlay hidden">
-        <div class="modal-card glass small">
-            <div class="modal-header">
-                <h3>🔒 PRIVATE SPACE GATED</h3>
-            </div>
-            <div class="modal-body" style="text-align: center;">
-                <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-dim);">This space requires a 4-digit PIN access key:</p>
-                <input type="password" id="prompt-pin-input" class="input-field center-text" maxlength="4" placeholder="••••" pattern="[0-9]*" inputmode="numeric">
-                <div id="pin-error-msg" class="error-text hidden">INCORRECT PIN. ACCESS DENIED.</div>
-                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                    <button id="submit-pin-btn" class="btn btn-primary" style="margin:0;">VERIFY KEY</button>
-                    <button id="cancel-pin-btn" class="btn btn-secondary" style="margin:0;">ABORT MISSION</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Landing Page View with 3D Holographic Card -->
+    <!-- Landing Page View -->
     <div id="landing-page" class="view">
         <div class="logo-container">
             <div class="logo-box-tilted">
                 <span class="play-icon">👻</span>
             </div>
             <h1 class="logo-text">GHOSTED</h1>
-            <p class="logo-sub">Synchronized Void Sync Experience</p>
+            <p class="logo-sub">EXPERIMENTAL 3D UI SHOWCASE</p>
         </div>
 
-        <div class="card-glow-wrapper" id="hero-card-wrapper">
-            <div class="hero-card glass" id="3d-hero-card">
-                <!-- Glowing outline overlay -->
-                <div class="glow-outline"></div>
-
-                <!-- Nickname Input -->
-                <div class="input-container">
-                    <label for="nickname-input">SPIRIT CALLSIGN</label>
-                    <input type="text" id="nickname-input" class="input-field" placeholder="Enter callsign..." maxlength="15">
-                </div>
-
-                <!-- Tab Link Navigation -->
-                <div class="tabs-navigation">
-                    <button id="tab-join-link" class="tab-nav-btn active">JOIN SPACE</button>
-                    <button id="tab-create-link" class="tab-nav-btn">CREATE SPACE</button>
-                </div>
-
-                <!-- Join Tab Content -->
-                <div id="tab-join-content" class="tab-pane active">
-                    <div class="input-container">
-                        <label for="room-id-input">ROOM TARGET CODE</label>
-                        <input type="text" id="room-id-input" class="input-field" placeholder="TARGET ROOM ID...">
-                    </div>
-                    <button id="join-room-btn" class="btn btn-primary">JOIN VOID</button>
-                    <button id="discover-btn" class="btn btn-secondary" style="margin-top: 0.5rem;">🪐 DISCOVER SPACES</button>
-                </div>
-
-                <!-- Create Tab Content -->
-                <div id="tab-create-content" class="tab-pane">
-                    <div class="input-container">
-                        <label for="space-name-input">SPACE NAME</label>
-                        <input type="text" id="space-name-input" class="input-field" placeholder="GALAXY DELTA...">
-                    </div>
-                    
-                    <div class="input-container">
-                        <label for="space-genre-input">GENRE TYPE</label>
-                        <input type="text" id="space-genre-input" class="input-field" placeholder="Music, Movies, Sci-Fi...">
-                    </div>
-
-                    <div class="input-container">
-                        <label for="space-access-select">ACCESS PROTOCOL</label>
-                        <select id="space-access-select" class="input-field select-field">
-                            <option value="public" selected>PUBLIC CHANNEL</option>
-                            <option value="private">PRIVATE GATED (PIN)</option>
-                        </select>
-                    </div>
-
-                    <div id="pin-input-container" class="input-container hidden">
-                        <label for="space-pin-input">4-DIGIT SECURITY PIN</label>
-                        <input type="text" id="space-pin-input" class="input-field" placeholder="e.g. 1234" maxlength="4" pattern="[0-9]*" inputmode="numeric">
-                    </div>
-
-                    <button id="create-room-btn" class="btn btn-primary">LAUNCH SPACE</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- App Page View -->
-    <div id="app-page" class="view hidden">
-        <header class="header-glass glass">
-            <div class="logo-container-mini">
-                <div class="logo-box-tilted-mini">
-                    <span class="play-icon-mini">👻</span>
-                </div>
-                <h2 class="logo-text-mini">Ghosted</h2>
-            </div>
+        <!-- 3D PERSPECTIVE SCREEN WRAPPER -->
+        <div class="experimental-showcase-grid">
             
-            <div class="header-info-actions">
-                <div id="room-badge" class="badge-glass glass" title="Click to copy invite link">
-                    <span class="badge-label">ROOM</span>
-                    <span id="current-room-display">...</span>
-                    <button id="copy-link-btn" class="icon-btn-copy">🔗</button>
+            <!-- SECTION 1: 3D ASCII Canvas (Three.js Renderer) -->
+            <div class="showcase-card glass" id="ascii-showcase">
+                <div class="glow-outline"></div>
+                <div class="card-header">
+                    <span class="tech-badge">WebGL / Three.js</span>
+                    <h3>3D ASCII Renderer</h3>
                 </div>
-                <div id="user-badge" class="badge-glass glass">
-                    <span class="badge-label">SPIRIT</span>
-                    <span id="user-display">Callsign</span>
+                <div class="canvas-container" id="ascii-canvas-container">
+                    <!-- Three.js ASCII canvas renders here -->
                 </div>
-                <button id="leave-room-btn" class="btn-exit">ABORT SPACE 🚪</button>
+                <div class="card-desc">
+                    Spinning 3D torus knot converted to dynamic text characters based on light luminance. Move cursor to rotate.
+                </div>
             </div>
-        </header>
 
-        <main class="app-main">
-            <!-- COLUMN 1: Video Player Console -->
-            <section class="video-container">
-                <div class="player-box">
-                    <div id="player"></div>
-                    
-                    <!-- Reactions Overlay Panel -->
-                    <div id="reactions-container" class="reactions-container"></div>
-                    
-                    <!-- Reaction panel (left tray) -->
-                    <div id="reaction-panel" class="reaction-panel collapsed">
-                        <button id="reaction-toggle" class="reaction-toggle glass">❯</button>
-                        <div id="reaction-bar" class="reaction-bar glass">
-                            <button class="reaction-btn" data-emoji="🔥" title="FIRE">🔥</button>
-                            <button class="reaction-btn" data-emoji="😂" title="LAUGH">😂</button>
-                            <button class="reaction-btn" data-emoji="❤️" title="LOVE">❤️</button>
-                            <button class="reaction-btn" data-emoji="👍" title="LIKE">👍</button>
-                            <button class="reaction-btn" data-emoji="✨" title="SPARKLE">✨</button>
-                        </div>
-                    </div>
+            <!-- SECTION 2: Physics Interactive Badges (Matter.js Canvas) -->
+            <div class="showcase-card glass" id="physics-showcase">
+                <div class="glow-outline"></div>
+                <div class="card-header">
+                    <span class="tech-badge">Matter.js Physics</span>
+                    <h3>Collision Badges</h3>
                 </div>
-                
-                <!-- Video Controls & Search Console -->
-                <div class="controls-bar glass">
-                    <div id="search-results-overlay" class="search-results-overlay glass hidden">
-                        <div class="search-results-header">🌌 SEARCH TELEMETRY RESULTS</div>
-                        <div id="search-results-list" class="search-results-list"></div>
-                    </div>
-                    <div class="search-wrapper">
-                        <input type="text" id="video-url-input" class="input-field search-input" placeholder="Search YouTube videos or paste direct link...">
-                        <button id="search-video-btn" class="btn btn-secondary" style="width: auto; padding: 0 1.5rem; margin: 0;">🔍 SEARCH</button>
-                        <button id="change-video-btn" class="btn btn-primary" style="width: auto; padding: 0 1.5rem; margin: 0;">PLAY LINK</button>
-                        <button id="add-queue-btn" class="btn btn-secondary" style="width: auto; padding: 0 1rem; margin: 0;">+ QUEUE</button>
-                    </div>
+                <div class="canvas-container" id="physics-canvas-container">
+                    <!-- Matter.js Physics canvas renders here -->
                 </div>
-            </section>
+                <div class="card-desc">
+                    Grab, toss, or push these floating callsign pills around. Click inside the canvas to spawn more collision bodies.
+                </div>
+            </div>
 
-            <!-- COLUMN 2: Sidebar Terminal -->
-            <aside class="sidebar-panel glass">
-                <div class="sidebar-tabs">
-                    <button class="tab-link active" data-tab="chat">VOID WHISPER</button>
-                    <button class="tab-link" data-tab="queue">PLAYLIST QUEUE</button>
-                    <button class="tab-link" data-tab="pilots">ACTIVE SPIRITS</button>
+            <!-- SECTION 3: Liquid Glass Distortion Card -->
+            <div class="showcase-card glass" id="liquid-showcase">
+                <div class="glow-outline"></div>
+                <div class="card-header">
+                    <span class="tech-badge">GLSL Shader / SVG Filter</span>
+                    <h3>Liquid Refraction</h3>
                 </div>
-
-                <!-- Chat Tab Panel -->
-                <div id="chat-tab" class="tab-content chat-window active">
-                    <div id="chat-messages" class="message-list"></div>
-                    <div class="chat-footer">
-                        <input type="text" id="chat-input" class="input-field" style="margin: 0;" placeholder="Broadcast whisper to space...">
-                        <button id="send-msg-btn" class="btn send-btn">🚀</button>
+                <div class="canvas-container refraction-target">
+                    <!-- Refractive content with hover coordinates -->
+                    <div class="liquid-overlay"></div>
+                    <div class="liquid-inner-content">
+                        <div class="refraction-avatar">🔮</div>
+                        <h4>THE VOID PORTAL</h4>
+                        <p>Hover your cursor over this card to watch the light distort and refract organically around the pointer like liquid glass.</p>
                     </div>
                 </div>
+                <div class="card-desc">
+                    Real-time mouse-following displacement lens distortion overlay.
+                </div>
+            </div>
 
-                <!-- Queue Tab Panel -->
-                <div id="queue-tab" class="tab-content queue-container hidden">
-                    <div id="queue-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <p class="empty-msg" style="text-align: center; color: var(--text-dim); margin-top: 2rem;">Queue is empty. Add some tracks!</p>
+            <!-- SECTION 4: 3D Perspective Card Stack / Cover Flow -->
+            <div class="showcase-card glass" id="stack-showcase">
+                <div class="glow-outline"></div>
+                <div class="card-header">
+                    <span class="tech-badge">preserve-3d / CSS transforms</span>
+                    <h3>3D Cover Flow</h3>
+                </div>
+                <div class="canvas-container stack-layout" id="deck-wrapper">
+                    <!-- Stack of 3D cards -->
+                    <div class="stack-card card-1" style="--card-idx: 0;">
+                        <span class="stack-emoji">👻</span>
+                        <h5>Neon Spectre</h5>
+                        <p>@spectre-09</p>
+                    </div>
+                    <div class="stack-card card-2" style="--card-idx: 1;">
+                        <span class="stack-emoji">🧙</span>
+                        <h5>Void Seer</h5>
+                        <p>@seer-88</p>
+                    </div>
+                    <div class="stack-card card-3" style="--card-idx: 2;">
+                        <span class="stack-emoji">🧟</span>
+                        <h5>Glow Phantom</h5>
+                        <p>@phantom-4</p>
                     </div>
                 </div>
-
-                <!-- Pilots List Tab Panel -->
-                <div id="pilots-tab" class="tab-content pilots-container hidden">
-                    <div id="pilots-list" class="pilots-list">
-                        <!-- Injected by JavaScript -->
-                    </div>
+                <div class="card-desc" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Z-axis perspective cards. Hover to expand.</span>
+                    <button class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem; margin: 0; font-size: 0.75rem;" onclick="cycleStack()">CYCLE</button>
                 </div>
-            </aside>
-        </main>
+            </div>
+
+        </div>
     </div>
 
-    <!-- Toast Notification (Hidden Pop-up) -->
-    <div id="toast-notification" class="toast-notification glass hidden">
-        <span class="toast-icon">✅</span>
-        <span id="toast-message">INVITATION LINK COPIED TO CLIPBOARD</span>
-    </div>
+    <!-- Hidden SVG Filter for Liquid Glass Refraction Effect -->
+    <svg style="display: none;">
+        <defs>
+            <filter id="liquid-refraction-filter">
+                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
 
-    <!-- YouTube IFrame API scripts -->
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="app.js"></script>
 </body>
 </html>
