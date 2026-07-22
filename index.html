@@ -11,15 +11,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
-    <!-- Ambient Pulsing Radar/Telemetry Blobs -->
-    <div class="ambient-blob blob-1"></div>
-    <div class="ambient-blob blob-2"></div>
+    <!-- Canvas for Interactive Stars/Particles -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Ambient Morphing Blobs -->
+    <div class="morph-blob blob-purple"></div>
+    <div class="morph-blob blob-orange"></div>
+    <div class="morph-blob blob-cyan"></div>
     
-    <!-- Floating Console Controls -->
-    <button id="discover-btn" class="discover-btn glass" title="Discover Spaces">🪐 DISCOVER SPACES</button>
+    <!-- Theme Toggle -->
     <div id="theme-toggle" class="theme-toggle glass" title="Toggle System Mode">🌙</div>
 
-    <!-- Discover Spaces Overlay (Modal Panel) -->
+    <!-- Discover Spaces Overlay -->
     <div id="discover-overlay" class="modal-overlay hidden">
         <div class="modal-card glass">
             <div class="modal-header">
@@ -34,7 +37,7 @@
         </div>
     </div>
 
-    <!-- Password PIN Prompt Overlay (Modal Panel) -->
+    <!-- Password PIN Prompt Overlay -->
     <div id="pin-prompt-overlay" class="modal-overlay hidden">
         <div class="modal-card glass small">
             <div class="modal-header">
@@ -52,69 +55,70 @@
         </div>
     </div>
 
-    <!-- Landing Page View -->
+    <!-- Landing Page View with 3D Holographic Card -->
     <div id="landing-page" class="view">
         <div class="logo-container">
             <div class="logo-box-tilted">
                 <span class="play-icon">👻</span>
             </div>
-            <h1 class="logo-text">Ghosted</h1>
+            <h1 class="logo-text">GHOSTED</h1>
+            <p class="logo-sub">Synchronized Void Sync Experience</p>
         </div>
 
-        <!-- Invitation Detected Badge -->
-        <div id="invitation-badge" class="invitation-badge glass hidden">
-            <span class="pulse-dot"></span>
-            <span id="invitation-text">INVITATION DETECTED: SPACE ROOM CODE ACCESSIBLE</span>
-        </div>
-        
-        <div class="hero-card glass">
-            <!-- Nickname Input (Max 15 characters) -->
-            <div class="input-container">
-                <label for="nickname-input">SPIRIT CALLSIGN</label>
-                <input type="text" id="nickname-input" class="input-field" placeholder="Enter anonymous callsign..." maxlength="15">
-            </div>
+        <div class="card-glow-wrapper" id="hero-card-wrapper">
+            <div class="hero-card glass" id="3d-hero-card">
+                <!-- Glowing outline overlay -->
+                <div class="glow-outline"></div>
 
-            <!-- Tab Link Navigation -->
-            <div class="tabs-navigation">
-                <button id="tab-join-link" class="tab-nav-btn active">JOIN SPACE</button>
-                <button id="tab-create-link" class="tab-nav-btn">CREATE SPACE</button>
-            </div>
-
-            <!-- Join Tab Content -->
-            <div id="tab-join-content" class="tab-pane active">
+                <!-- Nickname Input -->
                 <div class="input-container">
-                    <label for="room-id-input">ROOM TARGET CODE</label>
-                    <input type="text" id="room-id-input" class="input-field" placeholder="TARGET ROOM ID...">
-                </div>
-                <button id="join-room-btn" class="btn btn-primary">JOIN VOID</button>
-            </div>
-
-            <!-- Create Tab Content -->
-            <div id="tab-create-content" class="tab-pane">
-                <div class="input-container">
-                    <label for="space-name-input">SPACE NAME</label>
-                    <input type="text" id="space-name-input" class="input-field" placeholder="GALAXY DELTA...">
-                </div>
-                
-                <div class="input-container">
-                    <label for="space-genre-input">GENRE TYPE</label>
-                    <input type="text" id="space-genre-input" class="input-field" placeholder="Music, Movies, Sci-Fi...">
+                    <label for="nickname-input">SPIRIT CALLSIGN</label>
+                    <input type="text" id="nickname-input" class="input-field" placeholder="Enter callsign..." maxlength="15">
                 </div>
 
-                <div class="input-container">
-                    <label for="space-access-select">ACCESS PROTOCOL</label>
-                    <select id="space-access-select" class="input-field select-field">
-                        <option value="public" selected>PUBLIC CHANNEL</option>
-                        <option value="private">PRIVATE GATED (PIN)</option>
-                    </select>
+                <!-- Tab Link Navigation -->
+                <div class="tabs-navigation">
+                    <button id="tab-join-link" class="tab-nav-btn active">JOIN SPACE</button>
+                    <button id="tab-create-link" class="tab-nav-btn">CREATE SPACE</button>
                 </div>
 
-                <div id="pin-input-container" class="input-container hidden">
-                    <label for="space-pin-input">4-DIGIT SECURITY PIN</label>
-                    <input type="text" id="space-pin-input" class="input-field" placeholder="e.g. 1234" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+                <!-- Join Tab Content -->
+                <div id="tab-join-content" class="tab-pane active">
+                    <div class="input-container">
+                        <label for="room-id-input">ROOM TARGET CODE</label>
+                        <input type="text" id="room-id-input" class="input-field" placeholder="TARGET ROOM ID...">
+                    </div>
+                    <button id="join-room-btn" class="btn btn-primary">JOIN VOID</button>
+                    <button id="discover-btn" class="btn btn-secondary" style="margin-top: 0.5rem;">🪐 DISCOVER SPACES</button>
                 </div>
 
-                <button id="create-room-btn" class="btn btn-primary">LAUNCH SPACE</button>
+                <!-- Create Tab Content -->
+                <div id="tab-create-content" class="tab-pane">
+                    <div class="input-container">
+                        <label for="space-name-input">SPACE NAME</label>
+                        <input type="text" id="space-name-input" class="input-field" placeholder="GALAXY DELTA...">
+                    </div>
+                    
+                    <div class="input-container">
+                        <label for="space-genre-input">GENRE TYPE</label>
+                        <input type="text" id="space-genre-input" class="input-field" placeholder="Music, Movies, Sci-Fi...">
+                    </div>
+
+                    <div class="input-container">
+                        <label for="space-access-select">ACCESS PROTOCOL</label>
+                        <select id="space-access-select" class="input-field select-field">
+                            <option value="public" selected>PUBLIC CHANNEL</option>
+                            <option value="private">PRIVATE GATED (PIN)</option>
+                        </select>
+                    </div>
+
+                    <div id="pin-input-container" class="input-container hidden">
+                        <label for="space-pin-input">4-DIGIT SECURITY PIN</label>
+                        <input type="text" id="space-pin-input" class="input-field" placeholder="e.g. 1234" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+                    </div>
+
+                    <button id="create-room-btn" class="btn btn-primary">LAUNCH SPACE</button>
+                </div>
             </div>
         </div>
     </div>

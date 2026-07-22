@@ -1,4 +1,4 @@
-// Ghosted Client-side Sync Engine (with Offline Demonstration Fallback)
+// Ghosted Client-side Sync Engine (with Interactive Canvas Particles & 3D Tilt)
 const urlParams = new URLSearchParams(window.location.search);
 const serverParam = urlParams.get('server');
 
@@ -181,8 +181,7 @@ function triggerFloatingEmoji(emoji) {
     el.className = 'floating-emoji';
     el.textContent = emoji;
     
-    // Random position across video screen width
-    const leftOffset = Math.random() * 80 + 10; // 10% to 90%
+    const leftOffset = Math.random() * 80 + 10;
     el.style.left = `${leftOffset}%`;
     el.style.bottom = '10px';
     
@@ -207,7 +206,6 @@ function runOfflineModeInit() {
 
 // --- YouTube Player Config ---
 function setupYoutubePlayer(videoId) {
-    // Check if player already exists
     if (player && typeof player.loadVideoById === 'function') {
         player.loadVideoById(videoId);
         return;
@@ -237,7 +235,6 @@ function onPlayerReady(event) {
 function onPlayerStateChange(event) {
     if (isOfflineMode) return;
     
-    // Sync state changes with socket server
     if (!isInternalChange && socket) {
         const state = event.data;
         const time = player.getCurrentTime();
@@ -265,7 +262,6 @@ joinRoomBtn.addEventListener('click', () => {
             userDisplay.textContent = nickname;
             setupYoutubePlayer(res.videoId || currentVideoId);
         } else if (res.status === 'pin-required') {
-            // Show PIN Prompt
             pinPromptOverlay.classList.remove('hidden');
         } else {
             alert(res.message);
@@ -300,7 +296,6 @@ createRoomBtn.addEventListener('click', () => {
     });
 });
 
-// Broadcast messages
 sendMsgBtn.addEventListener('click', sendMsg);
 chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMsg();
@@ -314,7 +309,6 @@ function sendMsg() {
         appendMessage(nickname, text, true);
         chatInput.value = '';
         
-        // Mock reply
         setTimeout(() => {
             const replies = [
                 "I agree, that fits the vibe perfectly.",
@@ -345,12 +339,10 @@ function appendMessage(sender, text, isMe) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Play YouTube URL direct link
 changeVideoBtn.addEventListener('click', () => {
     const url = videoUrlInput.value.trim();
     if (!url) return;
     
-    // Parse YouTube ID
     const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/);
     const videoId = match ? match[1] : url;
 
@@ -364,12 +356,10 @@ changeVideoBtn.addEventListener('click', () => {
     }
 });
 
-// Search functionality
 searchVideoBtn.addEventListener('click', () => {
     const query = videoUrlInput.value.trim();
     if (!query) return;
 
-    // Simulate search results for demo
     const mockResults = [
         { id: 'J---aiyznGQ', title: 'Ghosted Ambient Lofi Vibe', duration: '3:45', author: 'Lofi Records' },
         { id: 'dQw4w9WgXcQ', title: 'Rick Astley - Never Gonna Give You Up', duration: '3:32', author: 'RickAstleyVEVO' },
@@ -407,14 +397,12 @@ function displaySearchResults(results) {
     searchResultsOverlay.classList.remove('hidden');
 }
 
-// Close search
 document.addEventListener('click', (e) => {
     if (!searchResultsOverlay.contains(e.target) && e.target !== searchVideoBtn && e.target !== videoUrlInput) {
         searchResultsOverlay.classList.add('hidden');
     }
 });
 
-// Copy Invite link
 copyLinkBtn.addEventListener('click', () => {
     const link = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
     navigator.clipboard.writeText(link).then(() => {
@@ -422,12 +410,10 @@ copyLinkBtn.addEventListener('click', () => {
     });
 });
 
-// Abort/Leave Space
 leaveRoomBtn.addEventListener('click', () => {
     location.reload();
 });
 
-// Discover spaces
 discoverBtn.addEventListener('click', () => {
     activeRoomsList.innerHTML = '';
     activeRooms.forEach(room => {
@@ -449,14 +435,12 @@ closeDiscoverBtn.addEventListener('click', () => {
     discoverOverlay.classList.add('hidden');
 });
 
-// Direct join from discover
 window.joinDirect = function(id) {
     roomIdInput.value = id;
     discoverOverlay.classList.add('hidden');
     joinRoomBtn.click();
 };
 
-// Sidebar Tab switching
 document.querySelectorAll('.tab-link').forEach(link => {
     link.addEventListener('click', (e) => {
         document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
@@ -481,42 +465,115 @@ function updatePilotsList(pilots) {
     });
 }
 
-// --- SOCKET EVENT BINDINGS (ONLINE MODE) ---
-if (socket) {
-    socket.on('connect', () => {
-        console.log("Connected to sync socket server.");
+// --- INTERACTIVE BACKGROUND STARS ENGINE ---
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+class Star {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = Math.random() * 0.4 - 0.2;
+        this.speedY = Math.random() * 0.4 - 0.2;
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    }
+    draw() {
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+for (let i = 0; i < 75; i++) {
+    stars.push(new Star());
+}
+
+function animateStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach((star, index) => {
+        star.update();
+        star.draw();
+        
+        // Draw links between nearby stars
+        for (let j = index + 1; j < stars.length; j++) {
+            const other = stars[j];
+            const dist = Math.hypot(star.x - other.x, star.y - other.y);
+            if (dist < 100) {
+                ctx.strokeStyle = `rgba(189, 0, 255, ${0.15 - (dist / 100) * 0.15})`;
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(star.x, star.y);
+                ctx.lineTo(other.x, other.y);
+                ctx.stroke();
+            }
+        }
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+
+// --- 3D TILT EFFECT ON HERO CARD ---
+const tiltCard = document.getElementById('3d-hero-card');
+const wrapper = document.getElementById('hero-card-wrapper');
+
+if (wrapper && tiltCard) {
+    wrapper.addEventListener('mousemove', (e) => {
+        const rect = wrapper.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        
+        // Convert cursor offset to degrees rotation
+        const rotateX = -(y / rect.height) * 20; // max 20 degrees
+        const rotateY = (x / rect.width) * 20;
+        
+        tiltCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
     });
     
+    wrapper.addEventListener('mouseleave', () => {
+        tiltCard.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+    });
+}
+
+// --- SOCKET EVENTS ---
+if (socket) {
     socket.on('room-update', (data) => {
         updatePilotsList(data.pilots);
     });
-
     socket.on('state-change', (data) => {
         if (!player) return;
         isInternalChange = true;
-        
         const myTime = player.getCurrentTime();
         if (Math.abs(myTime - data.time) > 1.5) {
             player.seekTo(data.time, true);
         }
-
         if (data.state === YT.PlayerState.PLAYING) {
             player.playVideo();
         } else if (data.state === YT.PlayerState.PAUSED) {
             player.pauseVideo();
         }
-        
         isInternalChange = false;
     });
-
     socket.on('chat-message', (data) => {
         appendMessage(data.sender, data.message, data.sender === nickname);
     });
-
     socket.on('reaction', (data) => {
         triggerFloatingEmoji(data.emoji);
     });
-
     socket.on('change-video', (data) => {
         setupYoutubePlayer(data.videoId);
         showToast("SYNCED NEW VIDEO IN SPACE");
