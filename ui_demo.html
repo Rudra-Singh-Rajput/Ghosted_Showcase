@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghosted Premium UI/UX Sandbox</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Outfit:wght@400;600;800;900&family=Inconsolata:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0A0A0A;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --border-color: rgba(255, 255, 255, 0.06);
+      --accent-purple: #BD00FF;
+      --accent-orange: #FF8700;
+      --accent-cyan: #00FFFF;
+      --glow-purple: rgba(189, 0, 255, 0.25);
+      --glow-orange: rgba(255, 135, 0, 0.25);
+      --glow-cyan: rgba(0, 255, 255, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(255, 135, 0, 0.08) 0%, transparent 40%),
+                  #050505;
+    }
+
+    .showcase-container {
+      display: flex;
+      max-width: 1200px;
+      width: 90%;
+      gap: 50px;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 0;
+    }
+
+    /* Left Controls */
+    .info-panel {
+      flex: 1;
+      max-width: 480px;
+    }
+
+    .info-panel h1 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 3.2rem;
+      letter-spacing: -1.5px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffffff 40%, #888888 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .info-panel .tagline {
+      font-family: 'Outfit', sans-serif;
+      color: var(--accent-orange);
+      font-weight: 800;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 24px;
+      text-shadow: 0 0 10px var(--glow-orange);
+    }
+
+    .info-panel p {
+      color: #b0b0b0;
+      line-height: 1.6;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    .feature-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .feature-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 20px 24px;
+      border-radius: 20px;
+      color: #ffffff;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .feature-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(5px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .feature-btn.active {
+      background: linear-gradient(135deg, rgba(189, 0, 255, 0.12) 0%, rgba(255, 135, 0, 0.06) 100%);
+      border-color: var(--accent-purple);
+      box-shadow: 0 10px 40px var(--glow-purple);
+    }
+
+    .feature-btn .icon {
+      font-size: 1.8rem;
+    }
+
+    .feature-btn .details h4 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .feature-btn .details p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #808080;
+    }
+
+    .feature-btn.active .details p {
+      color: #cccccc;
+    }
+
+    /* Right Side Phone Simulator */
+    .phone-simulator {
+      width: 375px;
+      height: 780px;
+      border-radius: 44px;
+      border: 12px solid #1c1c1e;
+      background: #000;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9),
+                  0 0 50px rgba(189, 0, 255, 0.08),
+                  0 0 100px rgba(255, 135, 0, 0.03);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .phone-notch {
+      width: 130px;
+      height: 25px;
+      background: #1c1c1e;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+    }
+
+    /* Screen contents */
+    .screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
+
+    /* App Header */
+    .app-header {
+      padding: 35px 20px 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, #000 60%, transparent);
+      z-index: 10;
+    }
+
+    .app-header .logo {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255,255,255,0.1);
+    }
+
+    .app-header .logo span {
+      color: var(--accent-orange);
+    }
+
+    .app-header .avatar-ring {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-orange));
+      padding: 2px;
+      box-shadow: 0 0 10px var(--glow-purple);
+    }
+
+    .app-header .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #0F0F0F;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    /* Content views */
+    .screen-content {
+      flex: 1;
+      padding: 10px 20px;
+      overflow-y: auto;
+      display: none;
+      scrollbar-width: none;
+    }
+
+    .screen-content.active {
+      display: block;
+      animation: fadeIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* VIEW 1: Ghost Board */
+    .feed-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .feed-header h3 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 1.15rem;
+      letter-spacing: 1px;
+    }
+
+    .decay-slider-container {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 14px;
+      border-radius: 18px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.01);
+    }
+
+    .decay-slider-label {
+      font-size: 0.75rem;
+      color: #a0a0a0;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-family: 'Inconsolata', monospace;
+    }
+
+    .decay-slider {
+      width: 100%;
+      accent-color: var(--accent-purple);
+      cursor: pointer;
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    .whisper-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(16px);
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .whisper-card:hover {
+      border-color: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .whisper-card-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 0.8rem;
+    }
+
+    .whisper-card-author {
+      font-family: 'Inconsolata', monospace;
+      color: var(--accent-orange);
+      font-weight: bold;
+    }
+
+    .whisper-card-time {
+      color: #606060;
+      font-family: 'Inconsolata', monospace;
+    }
+
+    .whisper-card-body {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #e0e0e0;
+      margin-bottom: 16px;
+      transition: filter 0.3s ease, opacity 0.3s ease;
+    }
+
+    .whisper-card-footer {
+      display: flex;
+      gap: 15px;
+      font-size: 0.75rem;
+      color: #606060;
+      font-weight: 500;
+    }
+
+    /* VIEW 2: 3D Swipe Deck */
+    .deck-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 380px;
+      position: relative;
+      margin-top: 20px;
+    }
+
+    .swipe-card {
+      width: 280px;
+      height: 360px;
+      border-radius: 30px;
+      background: linear-gradient(145deg, #151515, #0F0F0F);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: absolute;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: grab;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+      transform-origin: 50% 100%;
+    }
+
+    .swipe-card.top-card {
+      z-index: 3;
+      transform: scale(1) translateY(0);
+    }
+
+    .swipe-card.back-card {
+      z-index: 2;
+      transform: scale(0.92) translateY(20px);
+      opacity: 0.6;
+    }
+
+    .swipe-card.far-card {
+      z-index: 1;
+      transform: scale(0.85) translateY(40px);
+      opacity: 0.3;
+    }
+
+    .swipe-avatar {
+      height: 120px;
+      width: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-purple), var(--accent-orange));
+      margin: 10px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .swipe-info {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .swipe-name {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      margin-bottom: 5px;
+    }
+
+    .swipe-alias {
+      font-family: 'Inconsolata', monospace;
+      color: var(--accent-orange);
+      font-size: 0.9rem;
+    }
+
+    .swipe-controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .swipe-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s ease;
+    }
+
+    .swipe-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .swipe-btn.dislike:hover {
+      color: #ff3b30;
+      border-color: #ff3b30;
+      box-shadow: 0 0 15px rgba(255, 59, 48, 0.2);
+    }
+
+    .swipe-btn.like:hover {
+      color: #00FF88;
+      border-color: #00FF88;
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+    }
+
+    /* VIEW 3: Chat Rooms & Ephemeral DMs */
+    .chat-bubble-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 380px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .chat-bubble {
+      max-width: 80%;
+      padding: 14px 18px;
+      border-radius: 20px;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      position: relative;
+      transition: filter 0.3s ease, opacity 0.3s ease;
+    }
+
+    .chat-bubble.incoming {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-bubble.outgoing {
+      background: linear-gradient(135deg, var(--accent-purple), #9000c0);
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 5px 15px rgba(189, 0, 255, 0.2);
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 20px;
+    }
+
+    .chat-input-field {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .chat-send-btn {
+      background: var(--accent-purple);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      transition: transform 0.2s ease;
+    }
+
+    .chat-send-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* VIEW 4: Level & Resonance */
+    .profile-summary {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .radial-progress-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin-bottom: 25px;
+    }
+
+    .radial-svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .radial-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.02);
+      stroke-width: 8;
+    }
+
+    .radial-bar {
+      fill: none;
+      stroke: url(#glowGradient);
+      stroke-width: 8;
+      stroke-dasharray: 502;
+      stroke-dashoffset: 502;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+
+    .radial-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .radial-text .level-num {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+
+    .radial-text .level-lbl {
+      font-size: 0.65rem;
+      color: #808080;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .rank-badge {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      color: var(--accent-orange);
+      margin-bottom: 24px;
+    }
+
+    .stats-row {
+      display: flex;
+      width: 100%;
+      gap: 12px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .stat-card h5 {
+      font-size: 0.7rem;
+      color: #606060;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .stat-card p {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    /* Floating XP Notification */
+    .xp-float {
+      position: absolute;
+      color: var(--accent-orange);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 1.2rem;
+      animation: floatUp 0.8s ease forwards;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) translateY(-50px) scale(1.2); }
+    }
+
+    /* Bottom Navigation Bar Simulator */
+    .app-nav {
+      height: 70px;
+      background: #050505;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .nav-item {
+      color: #555555;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.3s ease;
+    }
+
+    .nav-item.active {
+      color: var(--accent-orange);
+    }
+
+    .nav-item span {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Scrollbars */
+    .screen-content::-webkit-scrollbar,
+    .chat-bubble-container::-webkit-scrollbar {
+      width: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="showcase-container">
+  
+  <!-- Left Side Control Panel -->
+  <div class="info-panel">
+    <div class="tagline">Interactive UX Sandbox</div>
+    <h1>Ghosted Premium UI</h1>
+    <p>A hands-on simulator demonstrating our high-fidelity layout. Switch views below and use the sliders to test real-time fluid animations, custom card physics, and text decay engines.</p>
+    
+    <div class="feature-selector">
+      <button class="feature-btn active" onclick="switchTab(0)">
+        <span class="icon">👻</span>
+        <div class="details">
+          <h4>The Ghost Board</h4>
+          <p>Decaying anonymous feed posts with real-time blur adjustments.</p>
+        </div>
+      </button>
+      
+      <button class="feature-btn" onclick="switchTab(1)">
+        <span class="icon">🎴</span>
+        <div class="details">
+          <h4>3D Swipe Deck</h4>
+          <p>Gestures, smooth transitions, and cards rotation simulation.</p>
+        </div>
+      </button>
+      
+      <button class="feature-btn" onclick="switchTab(2)">
+        <span class="icon">💬</span>
+        <div class="details">
+          <h4>Vapor Chats</h4>
+          <p>Self-destructing ephemeral DM bubbles simulating server updates.</p>
+        </div>
+      </button>
+      
+      <button class="feature-btn" onclick="switchTab(3)">
+        <span class="icon">🔮</span>
+        <div class="details">
+          <h4>Spectral Resonance</h4>
+          <p>GPU-accelerated progress ring loaders and gamification.</p>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Right Side Interactive Phone -->
+  <div class="phone-simulator">
+    <div class="phone-notch"></div>
+    <div class="screen">
+      
+      <!-- Top header -->
+      <div class="app-header">
+        <div class="logo">GHOST<span>ED</span></div>
+        <div class="avatar-ring">
+          <div class="avatar">👻</div>
+        </div>
+      </div>
+
+      <!-- VIEW 1: Ghost Board (Decaying Whispers) -->
+      <div id="tab-ghost-board" class="screen-content active">
+        <div class="feed-header">
+          <h3>CAMPUS VOID</h3>
+        </div>
+        
+        <!-- Live Decay Controller -->
+        <div class="decay-slider-container">
+          <div class="decay-slider-label">
+            <span>Decay Age (Hours)</span>
+            <span id="slider-val">2 Hours</span>
+          </div>
+          <input type="range" class="decay-slider" id="decay-range" min="1" max="24" value="2">
+        </div>
+
+        <div class="whisper-card" id="card-1">
+          <div class="whisper-card-header">
+            <span class="whisper-card-author">@spirit-88</span>
+            <span class="whisper-card-time">4H left</span>
+          </div>
+          <div class="whisper-card-body" id="text-1">
+            Did anyone else see that weird glowing mist near the university library courtyard last night? It felt so cinematic.
+          </div>
+          <div class="whisper-card-footer">
+            <span>🔥 45 Echoes</span>
+            <span>💬 12 comments</span>
+          </div>
+        </div>
+
+        <div class="whisper-card" id="card-2">
+          <div class="whisper-card-header">
+            <span class="whisper-card-author">@shadow-arc</span>
+            <span class="whisper-card-time">12H left</span>
+          </div>
+          <div class="whisper-card-body" id="text-2">
+            The CSE department exam results are reportedly coming out tomorrow. Prepare your shields, spirits.
+          </div>
+          <div class="whisper-card-footer">
+            <span>💀 120 Echoes</span>
+            <span>💬 41 comments</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: 3D Swipe Deck -->
+      <div id="tab-swipe-deck" class="screen-content">
+        <div class="feed-header">
+          <h3>MATCHING RESONANCE</h3>
+        </div>
+        
+        <div class="deck-container">
+          <div class="swipe-card top-card" id="scard-1">
+            <div class="swipe-avatar">🎃</div>
+            <div class="swipe-info">
+              <div class="swipe-name">Neon Spectre</div>
+              <div class="swipe-alias">@spectre-09</div>
+            </div>
+            <div style="font-size: 0.8rem; color: #808080; text-align: center;">Interested in CSE & late night code jams.</div>
+          </div>
+          
+          <div class="swipe-card back-card" id="scard-2">
+            <div class="swipe-avatar">🧙</div>
+            <div class="swipe-info">
+              <div class="swipe-name">Void Seer</div>
+              <div class="swipe-alias">@seer-88</div>
+            </div>
+            <div style="font-size: 0.8rem; color: #808080; text-align: center;">Likes ambient synth music and coffee.</div>
+          </div>
+
+          <div class="swipe-card far-card">
+            <div class="swipe-avatar">💀</div>
+            <div class="swipe-info">
+              <div class="swipe-name">Night Stalker</div>
+              <div class="swipe-alias">@stalker-3</div>
+            </div>
+            <div style="font-size: 0.8rem; color: #808080; text-align: center;">University lobby chess champion.</div>
+          </div>
+        </div>
+
+        <div class="swipe-controls">
+          <button class="swipe-btn dislike" onclick="swipeLeft()">❌</button>
+          <button class="swipe-btn like" onclick="swipeRight()">🔥</button>
+        </div>
+      </div>
+
+      <!-- VIEW 3: Vapor Chats -->
+      <div id="tab-vapor-chats" class="screen-content">
+        <div class="feed-header">
+          <h3>ANONYMOUS CHAT</h3>
+        </div>
+        
+        <!-- Live Chat Decay Controller -->
+        <div class="decay-slider-container">
+          <div class="decay-slider-label">
+            <span>Message Decay Age (Hours)</span>
+            <span id="chat-slider-val">3 Hours</span>
+          </div>
+          <input type="range" class="decay-slider" id="chat-decay-range" min="1" max="24" value="3">
+        </div>
+
+        <div class="chat-bubble-container" id="chat-scroller">
+          <div class="chat-bubble incoming" id="msg-1">
+            Hey! Did you finish the design for the app showcase?
+          </div>
+          <div class="chat-bubble outgoing" id="msg-2">
+            Yeah! I added the Vercel hosting link and got Supabase configured.
+          </div>
+          <div class="chat-bubble incoming" id="msg-3">
+            Awesome! The message bubbles and whispers should start blurring automatically as time goes on. Let's see!
+          </div>
+        </div>
+
+        <div class="chat-input-row">
+          <input type="text" class="chat-input-field" id="chat-input" placeholder="Whisper into the void..." onkeypress="handleChatPress(event)">
+          <button class="chat-send-btn" onclick="sendMockMessage()">⚡</button>
+        </div>
+      </div>
+
+      <!-- VIEW 4: Level & Resonance -->
+      <div id="tab-profile" class="screen-content">
+        <div class="feed-header">
+          <h3>SPECTRAL DETAILS</h3>
+        </div>
+        
+        <div class="profile-summary" id="profile-area">
+          <div class="radial-progress-container" onclick="gainXpEffect(event)">
+            <svg class="radial-svg">
+              <defs>
+                <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="var(--accent-purple)" />
+                  <stop offset="100%" stop-color="var(--accent-orange)" />
+                </linearGradient>
+              </defs>
+              <circle class="radial-bg" cx="90" cy="90" r="80" />
+              <circle class="radial-bar" id="level-ring" cx="90" cy="90" r="80" />
+            </svg>
+            <div class="radial-text">
+              <div class="level-num" id="profile-level">12</div>
+              <div class="level-lbl">LEVEL</div>
+            </div>
+          </div>
+          
+          <div class="rank-badge" id="profile-rank">ETHEREAL SEER</div>
+          
+          <div class="stats-row">
+            <div class="stat-card" onclick="gainXpEffect(event)">
+              <h5>RESONANCE</h5>
+              <p id="profile-xp">1,250 XP</p>
+            </div>
+            <div class="stat-card">
+              <h5>STREAK</h5>
+              <p>7 DAYS</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulator Bottom Nav Bar -->
+      <div class="app-nav">
+        <div class="nav-item active" onclick="switchTab(0)" id="nav-0">
+          <div>👻</div>
+          <span>VOID</span>
+        </div>
+        <div class="nav-item" onclick="switchTab(1)" id="nav-1">
+          <div>🎴</div>
+          <span>SOUL</span>
+        </div>
+        <div class="nav-item" onclick="switchTab(2)" id="nav-2">
+          <div>💬</div>
+          <span>CHAT</span>
+        </div>
+        <div class="nav-item" onclick="switchTab(3)" id="nav-3">
+          <div>🔮</div>
+          <span>PROFILE</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Tab Switching Logic
+  function switchTab(index) {
+    // Update active nav item
+    document.querySelectorAll('.nav-item').forEach((item, i) => {
+      if (i === index) item.classList.add('active');
+      else item.classList.remove('active');
+    });
+
+    // Update active side panel buttons
+    document.querySelectorAll('.feature-btn').forEach((btn, i) => {
+      if (i === index) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+
+    // Update screen views
+    const contents = [
+      'tab-ghost-board',
+      'tab-swipe-deck',
+      'tab-vapor-chats',
+      'tab-profile'
+    ];
+    
+    contents.forEach((id, i) => {
+      const element = document.getElementById(id);
+      if (i === index) {
+        element.classList.add('active');
+      } else {
+        element.classList.remove('active');
+      }
+    });
+
+    // Ring animation trigger on profile load
+    if (index === 3) {
+      updateXpBar();
+    } else {
+      document.getElementById('level-ring').style.strokeDashoffset = 502;
+    }
+  }
+
+  // Live Post Decay Slider Logic
+  const range = document.getElementById('decay-range');
+  const label = document.getElementById('slider-val');
+  const text1 = document.getElementById('text-1');
+  const text2 = document.getElementById('text-2');
+
+  range.addEventListener('input', (e) => {
+    const val = e.target.value;
+    label.innerText = val + " Hours";
+
+    // Card 1 decay calculation (Relative age threshold = 14 hours)
+    const factor1 = Math.max(0, (val - 14) / 10);
+    text1.style.filter = `blur(${factor1 * 8}px)`;
+    text1.style.opacity = 1 - (factor1 * 0.9);
+
+    // Card 2 decay calculation (Relative age threshold = 2 hours)
+    const factor2 = Math.max(0, (val - 2) / 22);
+    text2.style.filter = `blur(${factor2 * 8}px)`;
+    text2.style.opacity = 1 - (factor2 * 0.9);
+  });
+
+  // Chat message decay slider logic
+  const chatRange = document.getElementById('chat-decay-range');
+  const chatLabel = document.getElementById('chat-slider-val');
+
+  chatRange.addEventListener('input', (e) => {
+    const val = e.target.value;
+    chatLabel.innerText = val + " Hours";
+
+    // Update decay filter across all current chat bubbles
+    const bubbles = document.querySelectorAll('.chat-bubble');
+    bubbles.forEach((bubble, idx) => {
+      const offsetThreshold = idx * 6; // stagger decay
+      const factor = Math.max(0, (val - offsetThreshold) / (24 - offsetThreshold));
+      bubble.style.filter = `blur(${factor * 7}px)`;
+      bubble.style.opacity = 1 - (factor * 0.85);
+    });
+  });
+
+  // 3D Card Swiping Simulation Physics
+  let activeCardIndex = 1;
+
+  function swipeLeft() {
+    const card = document.getElementById('scard-' + activeCardIndex);
+    if (!card) return;
+    card.style.transform = 'translate(-300px, 50px) rotate(-35deg)';
+    card.style.opacity = '0';
+    rotateDeck();
+  }
+
+  function swipeRight() {
+    const card = document.getElementById('scard-' + activeCardIndex);
+    if (!card) return;
+    card.style.transform = 'translate(300px, 50px) rotate(35deg)';
+    card.style.opacity = '0';
+    rotateDeck();
+  }
+
+  function rotateDeck() {
+    activeCardIndex = activeCardIndex === 1 ? 2 : 1;
+    const nextCard = document.getElementById('scard-' + activeCardIndex);
+    
+    if (nextCard) {
+      setTimeout(() => {
+        nextCard.className = 'swipe-card top-card';
+        // Reset card 1 back to tail position
+        const prevIndex = activeCardIndex === 1 ? 2 : 1;
+        const prevCard = document.getElementById('scard-' + prevIndex);
+        setTimeout(() => {
+          prevCard.className = 'swipe-card back-card';
+          prevCard.style.transform = '';
+          prevCard.style.opacity = '';
+        }, 400);
+      }, 100);
+    }
+  }
+
+  // Interactive Live Chat Simulator
+  function handleChatPress(e) {
+    if (e.key === 'Enter') {
+      sendMockMessage();
+    }
+  }
+
+  function sendMockMessage() {
+    const input = document.getElementById('chat-input');
+    const scroller = document.getElementById('chat-scroller');
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Create bubble
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble outgoing';
+    bubble.innerText = text;
+    
+    // Add to scroller
+    scroller.appendChild(bubble);
+    input.value = '';
+
+    // Scroll to bottom
+    scroller.scrollTop = scroller.scrollHeight;
+
+    // Setup auto-response mock delay
+    setTimeout(() => {
+      const replies = [
+        "That's wild! Tell me more.",
+        "Wait, really? I had no idea.",
+        "Honestly, same here. Late nights are best.",
+        "Haha, no cap! 💀"
+      ];
+      const randomReply = replies[Math.floor(Math.random() * replies.length)];
+      
+      const replyBubble = document.createElement('div');
+      replyBubble.className = 'chat-bubble incoming';
+      replyBubble.innerText = randomReply;
+      
+      scroller.appendChild(replyBubble);
+      scroller.scrollTop = scroller.scrollHeight;
+    }, 1200);
+  }
+
+  // Gamified Level XP Logic
+  let currentXp = 1250;
+  let level = 12;
+
+  function updateXpBar() {
+    const relativeXp = currentXp % 100;
+    const progressPercent = relativeXp / 100;
+    const dashoffset = 502 - (502 * progressPercent);
+    document.getElementById('level-ring').style.strokeDashoffset = dashoffset;
+  }
+
+  function gainXpEffect(e) {
+    currentXp += 25;
+    
+    // Check level up
+    const newLevel = Math.floor(currentXp / 100) + 1;
+    if (newLevel > level) {
+      level = newLevel;
+      document.getElementById('profile-level').innerText = level;
+      
+      // Update flairs based on levels from resonance service
+      let title = "PHANTOM";
+      if (level >= 50) title = "ETHEREAL SEER";
+      else if (level >= 40) title = "NIGHTSTALKER";
+      else if (level >= 30) title = "POLTERGEIST";
+      else if (level >= 20) title = "APPARITION";
+      else if (level >= 10) title = "WRAITH";
+      else if (level >= 5) title = "SHADOW";
+      document.getElementById('profile-rank').innerText = title;
+    }
+
+    document.getElementById('profile-xp').innerText = currentXp + " XP";
+    updateXpBar();
+
+    // Create floating XP text
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const floatText = document.createElement('div');
+    floatText.className = 'xp-float';
+    floatText.style.left = x + 'px';
+    floatText.style.top = y + 'px';
+    floatText.innerText = '+25 XP';
+
+    e.currentTarget.appendChild(floatText);
+
+    setTimeout(() => {
+      floatText.remove();
+    }, 850);
+  }
+</script>
+</body>
+</html>
