@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inconsolata:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inconsolata:wght@700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <!-- Matter.js for 2D Physics Badges -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
@@ -25,6 +25,54 @@
     <button id="discover-btn" class="discover-btn glass 3d-tilt-hover" title="Discover Spaces">🪐 DISCOVER SPACES</button>
     <!-- Theme Toggle -->
     <div id="theme-toggle" class="theme-toggle glass" title="Toggle System Mode">🌙</div>
+
+    <!-- VISUAL TWEAK BAR (Taste Customization Console) -->
+    <div id="tweak-bar" class="tweak-bar glass collapsed">
+        <button id="tweak-bar-toggle" class="tweak-bar-toggle glass">⚙️ TWEAKS</button>
+        <div class="tweak-bar-content">
+            <h3>🎨 TASTE CUSTOMIZATION</h3>
+            <p class="tweak-subtitle">Real-time design token adjustments</p>
+            
+            <div class="tweak-section">
+                <label>Aesthetic Presets</label>
+                <div class="preset-buttons">
+                    <button class="preset-btn active" onclick="setPreset('ghosted')">Ghosted</button>
+                    <button class="preset-btn" onclick="setPreset('cyber')">Cyber</button>
+                    <button class="preset-btn" onclick="setPreset('matrix')">Matrix</button>
+                    <button class="preset-btn" onclick="setPreset('mono')">Mono</button>
+                </div>
+            </div>
+
+            <div class="tweak-section">
+                <label>Typography Family</label>
+                <select id="tweak-font" class="tweak-select" onchange="updateTweakFont(this.value)">
+                    <option value="'Outfit', sans-serif">Outfit (Sans)</option>
+                    <option value="'Inconsolata', monospace">Inconsolata (Mono)</option>
+                    <option value="'Playfair Display', serif">Playfair (Serif)</option>
+                </select>
+            </div>
+
+            <div class="tweak-section">
+                <label>Glow intensity: <span id="tweak-glow-val">30px</span></label>
+                <input type="range" class="tweak-slider" id="tweak-glow" min="0" max="60" value="30" oninput="updateGlow(this.value)">
+            </div>
+
+            <div class="tweak-section">
+                <label>Backdrop Blur: <span id="tweak-blur-val">35px</span></label>
+                <input type="range" class="tweak-slider" id="tweak-blur" min="0" max="60" value="35" oninput="updateBlur(this.value)">
+            </div>
+
+            <div class="tweak-section">
+                <label>Corner Radius: <span id="tweak-radius-val">20px</span></label>
+                <input type="range" class="tweak-slider" id="tweak-radius" min="0" max="40" value="20" oninput="updateRadius(this.value)">
+            </div>
+
+            <div class="tweak-section">
+                <label>Star Particles: <span id="tweak-stars-val">60</span></label>
+                <input type="range" class="tweak-slider" id="tweak-stars" min="0" max="250" value="60" oninput="updateStarsCount(this.value)">
+            </div>
+        </div>
+    </div>
 
     <!-- Discover Spaces Overlay -->
     <div id="discover-overlay" class="modal-overlay hidden">
@@ -164,7 +212,7 @@
         <main class="app-main">
             <!-- COLUMN 1: Video Player Console -->
             <section class="video-container">
-                <div class="card-glow-wrapper" style="flex: 1; border-radius: 28px;">
+                <div class="card-glow-wrapper" style="flex: 1; border-radius: inherit;">
                     <div class="player-box glass" id="player-box-card">
                         <!-- Rotating Conic Border Outline -->
                         <div class="glow-outline"></div>

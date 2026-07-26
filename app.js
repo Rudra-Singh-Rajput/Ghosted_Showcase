@@ -1,4 +1,4 @@
-// Ghosted Web Synchronizer (with Starfield, 3D Tilt, Liquid Lens, and Matter.js Badges)
+// Ghosted Web Synchronizer (with Starfield, 3D Tilt, Liquid Lens, Matter.js Badges, and Visual Tweak Bar)
 const urlParams = new URLSearchParams(window.location.search);
 const serverParam = urlParams.get('server');
 
@@ -468,6 +468,7 @@ function updatePilotsList(pilots) {
 const canvas = document.getElementById('particles-canvas');
 const ctx = canvas.getContext('2d');
 let stars = [];
+let starsCount = 60;
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -498,9 +499,13 @@ class Star {
     }
 }
 
-for (let i = 0; i < 60; i++) {
-    stars.push(new Star());
+function initStars() {
+    stars = [];
+    for (let i = 0; i < starsCount; i++) {
+        stars.push(new Star());
+    }
 }
+initStars();
 
 function animateStars() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -546,7 +551,6 @@ if (wrapper && tiltCard) {
     });
 }
 
-// 3D Tilt on custom tilt buttons
 document.querySelectorAll('.3d-tilt-hover').forEach(btn => {
     btn.addEventListener('mousemove', (e) => {
         const rect = btn.getBoundingClientRect();
@@ -559,10 +563,12 @@ document.querySelectorAll('.3d-tilt-hover').forEach(btn => {
     });
 });
 
-// --- 3. MATTER.JS PHYSICS PILLS (Landing view decoration) ---
+// --- 3. MATTER.JS PHYSICS PILLS ---
 function initLandingPhysics() {
     const holder = document.getElementById('physics-canvas-holder');
     if (!holder) return;
+
+    holder.innerHTML = ''; // clear
 
     const width = holder.clientWidth || 800;
     const height = holder.clientHeight || 140;
@@ -592,13 +598,11 @@ function initLandingPhysics() {
     const runner = Runner.create();
     Runner.run(runner, engine);
 
-    // Bounds
     const ground = Bodies.rectangle(width/2, height + 15, width, 30, { isStatic: true });
     const leftWall = Bodies.rectangle(-15, height/2, 30, height, { isStatic: true });
     const rightWall = Bodies.rectangle(width + 15, height/2, 30, height, { isStatic: true });
     Composite.add(engine.world, [ground, leftWall, rightWall]);
 
-    // Spawn badges
     const tags = ["GHOSTED", "THE VOID", "HAPPY WATCH", "SOULMATCH", "RESONANCE", "ANONYMOUS"];
     const colors = ['#BD00FF', '#00FFFF', '#FF8700', '#FF007F'];
 
@@ -638,7 +642,6 @@ function initLandingPhysics() {
         });
     });
 
-    // Mouse drag
     const mouse = Mouse.create(render.canvas);
     const constraint = MouseConstraint.create(engine, {
         mouse: mouse,
@@ -646,11 +649,9 @@ function initLandingPhysics() {
     });
     Composite.add(engine.world, constraint);
 }
-
-// Init physics on load
 window.addEventListener('load', initLandingPhysics);
 
-// --- 4. LIQUID GLASS REFRACTION LENS ON VIDEO PLAYER ---
+// --- 4. LIQUID GLASS REFRACTION LENS ---
 const playerBox = document.getElementById('player-box-card');
 const refractionLens = document.getElementById('refraction-lens');
 
@@ -669,6 +670,84 @@ if (playerBox && refractionLens) {
         refractionLens.style.display = 'none';
     });
 }
+
+// --- 5. VISUAL TWEAK BAR EVENTS & LOGIC ---
+const tweakBar = document.getElementById('tweak-bar');
+const tweakBarToggle = document.getElementById('tweak-bar-toggle');
+
+tweakBarToggle.addEventListener('click', () => {
+    tweakBar.classList.toggle('collapsed');
+});
+
+// Preset Taste Configs
+const presets = {
+    ghosted: {
+        primary: '#BD00FF',
+        accent: '#FF8700',
+        cyan: '#00FFFF',
+        bg: '#050508'
+    },
+    cyber: {
+        primary: '#FF007F',
+        accent: '#00FFFF',
+        cyan: '#FFFF00',
+        bg: '#0a000a'
+    },
+    matrix: {
+        primary: '#00FF00',
+        accent: '#008000',
+        cyan: '#00FF66',
+        bg: '#000800'
+    },
+    mono: {
+        primary: '#FFFFFF',
+        accent: '#888888',
+        cyan: '#CCCCCC',
+        bg: '#0f0f0f'
+    }
+};
+
+window.setPreset = function(name) {
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick').includes(name)) btn.classList.add('active');
+    });
+
+    const p = presets[name];
+    if (p) {
+        document.documentElement.style.setProperty('--primary', p.primary);
+        document.documentElement.style.setProperty('--accent', p.accent);
+        document.documentElement.style.setProperty('--cyan', p.cyan);
+        document.documentElement.style.setProperty('--bg', p.bg);
+        showToast(`LOADED ${name.toUpperCase()} PRESET`);
+    }
+};
+
+window.updateTweakFont = function(fontFamily) {
+    document.body.style.fontFamily = fontFamily;
+};
+
+window.updateGlow = function(val) {
+    document.getElementById('tweak-glow-val').innerText = val + 'px';
+    document.documentElement.style.setProperty('--primary-glow', `rgba(189, 0, 255, ${val/100})`);
+    document.documentElement.style.setProperty('--cyan-glow', `rgba(0, 255, 255, ${val/100})`);
+};
+
+window.updateBlur = function(val) {
+    document.getElementById('tweak-blur-val').innerText = val + 'px';
+    document.documentElement.style.setProperty('--backdrop-blur', val + 'px');
+};
+
+window.updateRadius = function(val) {
+    document.getElementById('tweak-radius-val').innerText = val + 'px';
+    document.documentElement.style.setProperty('--border-radius', val + 'px');
+};
+
+window.updateStarsCount = function(val) {
+    document.getElementById('tweak-stars-val').innerText = val;
+    starsCount = parseInt(val);
+    initStars();
+};
 
 // --- SOCKET EVENTS ---
 if (socket) {
