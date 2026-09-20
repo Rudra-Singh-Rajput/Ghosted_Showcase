@@ -1,781 +1,560 @@
-// Ghosted Web Synchronizer (with Starfield, 3D Tilt, Liquid Lens, Matter.js Badges, and Visual Tweak Bar)
-const urlParams = new URLSearchParams(window.location.search);
-const serverParam = urlParams.get('server');
+// =========================================================
+// GHOSTED SHOWCASE & SIMULATOR JAVASCRIPT
+// Handles: Theme Engine, Simulator Mechanics, Canvas Starfield, Matter.js Arena
+// =========================================================
 
-let socket;
-let isOfflineMode = false;
+// --- 1. THEME ENGINE ---
+let currentTheme = 'ghosted';
 
-// Check if socket.io is loaded, otherwise run in Offline Simulation Mode
-if (typeof io !== 'undefined') {
-    try {
-        socket = io(serverParam || undefined);
-    } catch (e) {
-        console.warn("Socket.io connection failed. Initializing in Offline Simulation Mode.", e);
-        isOfflineMode = true;
-    }
-} else {
-    console.warn("Socket.io is not loaded. Initializing in Offline Simulation Mode.");
-    isOfflineMode = true;
+const themeConfigs = {
+  ghosted: {
+    name: 'Ghosted (Warm Ember)',
+    primary: '#FF8700',
+    secondary: '#BD00FF',
+    primaryRgb: '255, 135, 0',
+    dotClass: 'dot-ghosted'
+  },
+  cosmic: {
+    name: 'Cosmic (Nebula Purple)',
+    primary: '#BD00FF',
+    secondary: '#00F3FF',
+    primaryRgb: '189, 0, 255',
+    dotClass: 'dot-cosmic'
+  },
+  aurora: {
+    name: 'Aurora (Emerald Teal)',
+    primary: '#00FFCC',
+    secondary: '#0088FF',
+    primaryRgb: '0, 255, 204',
+    dotClass: 'dot-aurora'
+  },
+  comic: {
+    name: 'Comic (Graphic Halftone)',
+    primary: '#FFDE59',
+    secondary: '#FF5757',
+    primaryRgb: '255, 222, 89',
+    dotClass: 'dot-comic'
+  }
+};
+
+const themeBtn = document.getElementById('theme-btn');
+const themeMenu = document.getElementById('theme-menu');
+
+if (themeBtn && themeMenu) {
+  themeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    themeMenu.classList.toggle('show');
+  });
+
+  document.addEventListener('click', () => {
+    themeMenu.classList.remove('show');
+  });
 }
 
-// State
-let player;
-let roomId = '';
-let nickname = '';
-let myId = 'spirit_' + Math.floor(Math.random() * 1000);
-let isInternalChange = false;
-let currentVideoId = 'J---aiyznGQ'; // Default: Ghosted Ambient Vibe
-let queue = [];
-let myRole = 'spirit';
-let activeRooms = [
-    { id: 'VOID-7', name: 'CAMPUS CORNER', genre: 'General Chat', pilots: [{ name: '@wraith-8' }, { name: '@phantom-2' }] },
-    { id: 'DELTA-9', name: 'LATE NIGHT CODERS', genre: 'Sprints', pilots: [{ name: '@coder-x' }] }
-];
+function setTheme(name) {
+  if (!themeConfigs[name]) return;
+  currentTheme = name;
+  document.body.className = `theme-${name}`;
 
-// DOM Elements
-const landingPage = document.getElementById('landing-page');
-const appPage = document.getElementById('app-page');
-const reactionsContainer = document.getElementById('reactions-container');
-const reactionPanel = document.getElementById('reaction-panel');
-const reactionToggle = document.getElementById('reaction-toggle');
-const pilotsList = document.getElementById('pilots-list');
-const searchResultsOverlay = document.getElementById('search-results-overlay');
-const searchResultsList = document.getElementById('search-results-list');
-const searchVideoBtn = document.getElementById('search-video-btn');
-const copyLinkBtn = document.getElementById('copy-link-btn');
+  const config = themeConfigs[name];
+  const nameEl = document.querySelector('.theme-name');
+  if (nameEl) nameEl.textContent = config.name;
 
-// Inputs
-const nicknameInput = document.getElementById('nickname-input');
-const roomIdInput = document.getElementById('room-id-input');
-const spaceNameInput = document.getElementById('space-name-input');
-const spaceGenreInput = document.getElementById('space-genre-input');
-const spaceAccessSelect = document.getElementById('space-access-select');
-const pinInputContainer = document.getElementById('pin-input-container');
-const spacePinInput = document.getElementById('space-pin-input');
-const videoUrlInput = document.getElementById('video-url-input');
-const chatInput = document.getElementById('chat-input');
+  const dotEl = document.querySelector('.theme-color-dot');
+  if (dotEl) {
+    dotEl.style.background = config.primary;
+    dotEl.style.boxShadow = `0 0 8px ${config.primary}`;
+  }
 
-// Buttons
-const createRoomBtn = document.getElementById('create-room-btn');
-const joinRoomBtn = document.getElementById('join-room-btn');
-const sendMsgBtn = document.getElementById('send-msg-btn');
-const changeVideoBtn = document.getElementById('change-video-btn');
-const addQueueBtn = document.getElementById('add-queue-btn');
-const themeToggle = document.getElementById('theme-toggle');
-const leaveRoomBtn = document.getElementById('leave-room-btn');
-const discoverBtn = document.getElementById('discover-btn');
-
-// Overlays & Badges
-const currentRoomDisplay = document.getElementById('current-room-display');
-const userDisplay = document.getElementById('user-display');
-const chatMessages = document.getElementById('chat-messages');
-const queueList = document.getElementById('queue-list');
-const invitationBadge = document.getElementById('invitation-badge');
-const invitationText = document.getElementById('invitation-text');
-const discoverOverlay = document.getElementById('discover-overlay');
-const closeDiscoverBtn = document.getElementById('close-discover-btn');
-const activeRoomsList = document.getElementById('active-rooms-list');
-const pinPromptOverlay = document.getElementById('pin-prompt-overlay');
-const promptPinInput = document.getElementById('prompt-pin-input');
-const pinErrorMsg = document.getElementById('pin-error-msg');
-const submitPinBtn = document.getElementById('submit-pin-btn');
-const cancelPinBtn = document.getElementById('cancel-pin-btn');
-const toastNotification = document.getElementById('toast-notification');
-const toastMessage = document.getElementById('toast-message');
-
-// Tab links
-const tabJoinLink = document.getElementById('tab-join-link');
-const tabCreateLink = document.getElementById('tab-create-link');
-const tabJoinContent = document.getElementById('tab-join-content');
-const tabCreateContent = document.getElementById('tab-create-content');
-
-// --- THEME MANAGEMENT ---
-const savedTheme = localStorage.getItem('ghostedTheme') || 'dark';
-if (savedTheme === 'light') {
-    document.body.classList.add('light-mode');
-    themeToggle.textContent = '☀️';
-}
-
-themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('light-mode');
-    const isLight = document.body.classList.contains('light-mode');
-    themeToggle.textContent = isLight ? '☀️' : '🌙';
-    localStorage.setItem('ghostedTheme', isLight ? 'light' : 'dark');
-});
-
-// --- TABS CONTROL ---
-tabJoinLink.addEventListener('click', () => {
-    tabJoinLink.classList.add('active');
-    tabCreateLink.classList.remove('active');
-    tabJoinContent.classList.add('active');
-    tabCreateContent.classList.remove('active');
-});
-
-tabCreateLink.addEventListener('click', () => {
-    tabCreateLink.classList.add('active');
-    tabJoinLink.classList.remove('active');
-    tabCreateContent.classList.add('active');
-    tabJoinContent.classList.remove('active');
-});
-
-// --- INVITES ---
-window.addEventListener('load', () => {
-    const params = new URLSearchParams(window.location.search);
-    const roomParam = params.get('room');
-    const nameParam = params.get('name');
-    
-    if (nameParam) {
-        nicknameInput.value = decodeURIComponent(nameParam);
-    }
-    
-    if (roomParam) {
-        roomIdInput.value = roomParam.trim().toUpperCase();
-        invitationBadge.classList.remove('hidden');
-        invitationText.textContent = `🚀 INVITATION DETECTED: ACCESSING ROOM CODE [ ${roomParam} ]`;
-    }
-});
-
-// --- TOAST NOTIFICATIONS ---
-function showToast(message) {
-    toastMessage.textContent = message;
-    toastNotification.classList.remove('hidden');
-    setTimeout(() => {
-        toastNotification.classList.add('hidden');
-    }, 3000);
-}
-
-// --- ACCESS CONTROL GATES ---
-spaceAccessSelect.addEventListener('change', (e) => {
-    if (e.target.value === 'private') {
-        pinInputContainer.classList.remove('hidden');
+  document.querySelectorAll('.theme-opt').forEach(opt => {
+    if (opt.getAttribute('onclick').includes(name)) {
+      opt.classList.add('active');
     } else {
-        pinInputContainer.classList.add('hidden');
+      opt.classList.remove('active');
     }
-});
+  });
 
-// --- REACTION PANEL ---
-reactionToggle.addEventListener('click', () => {
-    reactionPanel.classList.toggle('collapsed');
-    reactionToggle.textContent = reactionPanel.classList.contains('collapsed') ? '❯' : '❮';
-});
-
-document.querySelectorAll('.reaction-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const emoji = btn.getAttribute('data-emoji');
-        sendReaction(emoji);
-    });
-});
-
-function sendReaction(emoji) {
-    if (isOfflineMode) {
-        triggerFloatingEmoji(emoji);
-    } else if (socket) {
-        socket.emit('reaction', { roomId, emoji });
-    }
+  if (themeMenu) themeMenu.classList.remove('show');
+  updatePhysicsColors();
 }
 
-function triggerFloatingEmoji(emoji) {
-    const container = document.getElementById('reactions-container');
-    const el = document.createElement('div');
-    el.className = 'floating-emoji';
-    el.textContent = emoji;
-    
-    const leftOffset = Math.random() * 80 + 10;
-    el.style.left = `${leftOffset}%`;
-    el.style.bottom = '10px';
-    
-    container.appendChild(el);
-    setTimeout(() => el.remove(), 2500);
-}
-
-// --- OFFLINE SIMULATION FUNCTIONS ---
-function runOfflineModeInit() {
-    nickname = nicknameInput.value.trim() || 'Spirit_' + Math.floor(Math.random() * 100);
-    landingPage.classList.add('hidden');
-    appPage.classList.remove('hidden');
-    
-    roomId = roomIdInput.value.trim().toUpperCase() || 'DEMO-VOID';
-    currentRoomDisplay.textContent = roomId;
-    userDisplay.textContent = nickname;
-
-    showToast("CONNECTED IN SIMULATION MODE");
-    setupYoutubePlayer(currentVideoId);
-    updatePilotsList([{ id: myId, name: nickname, role: 'host' }]);
-}
-
-// --- YouTube Player Config ---
-function setupYoutubePlayer(videoId) {
-    if (player && typeof player.loadVideoById === 'function') {
-        player.loadVideoById(videoId);
-        return;
-    }
-    
-    player = new YT.Player('player', {
-        height: '100%',
-        width: '100%',
-        videoId: videoId,
-        playerVars: {
-            'playsinline': 1,
-            'controls': 1,
-            'autoplay': 1,
-            'rel': 0
-        },
-        events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-        }
-    });
-}
-
-function onPlayerReady(event) {
-    event.target.playVideo();
-}
-
-function onPlayerStateChange(event) {
-    if (isOfflineMode) return;
-    
-    if (!isInternalChange && socket) {
-        const state = event.data;
-        const time = player.getCurrentTime();
-        socket.emit('state-change', { roomId, state, time });
-    }
-}
-
-// --- BUTTON TRIGGERS ---
-joinRoomBtn.addEventListener('click', () => {
-    if (isOfflineMode) {
-        runOfflineModeInit();
-        return;
-    }
-    
-    nickname = nicknameInput.value.trim();
-    const targetRoom = roomIdInput.value.trim().toUpperCase();
-    if (!nickname || !targetRoom) return alert("Nickname and Target Room ID are required!");
-
-    socket.emit('join-room', { roomId: targetRoom, nickname }, (res) => {
-        if (res.status === 'success') {
-            roomId = targetRoom;
-            landingPage.classList.add('hidden');
-            appPage.classList.remove('hidden');
-            currentRoomDisplay.textContent = roomId;
-            userDisplay.textContent = nickname;
-            setupYoutubePlayer(res.videoId || currentVideoId);
-        } else if (res.status === 'pin-required') {
-            pinPromptOverlay.classList.remove('hidden');
-        } else {
-            alert(res.message);
-        }
-    });
-});
-
-createRoomBtn.addEventListener('click', () => {
-    if (isOfflineMode) {
-        runOfflineModeInit();
-        return;
-    }
-
-    nickname = nicknameInput.value.trim();
-    const spaceName = spaceNameInput.value.trim() || 'Void Galaxy';
-    const access = spaceAccessSelect.value;
-    const pin = spacePinInput.value.trim();
-
-    if (!nickname) return alert("Nickname callsign is required!");
-
-    socket.emit('create-room', { nickname, spaceName, access, pin }, (res) => {
-        if (res.status === 'success') {
-            roomId = res.roomId;
-            landingPage.classList.add('hidden');
-            appPage.classList.remove('hidden');
-            currentRoomDisplay.textContent = roomId;
-            userDisplay.textContent = nickname;
-            setupYoutubePlayer(currentVideoId);
-        } else {
-            alert(res.message);
-        }
-    });
-});
-
-sendMsgBtn.addEventListener('click', sendMsg);
-chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMsg();
-});
-
-function sendMsg() {
-    const text = chatInput.value.trim();
-    if (!text) return;
-
-    if (isOfflineMode) {
-        appendMessage(nickname, text, true);
-        chatInput.value = '';
-        
-        setTimeout(() => {
-            const replies = [
-                "I agree, that fits the vibe perfectly.",
-                "Wait, is this video decaying too?",
-                "This synchronization is super fluid!",
-                "Spectral mode feels amazing."
-            ];
-            const rand = replies[Math.floor(Math.random() * replies.length)];
-            appendMessage("@wraith-8", rand, false);
-        }, 1200);
-    } else if (socket) {
-        socket.emit('chat-message', { roomId, message: text });
-        chatInput.value = '';
-    }
-}
-
-function appendMessage(sender, text, isMe) {
-    const bubble = document.createElement('div');
-    bubble.className = `message-bubble ${isMe ? 'outgoing' : 'incoming'}`;
-    bubble.innerText = text;
-
-    const meta = document.createElement('div');
-    meta.className = 'msg-meta';
-    meta.innerText = `${sender.toUpperCase()} • JUST NOW`;
-
-    chatMessages.appendChild(bubble);
-    chatMessages.appendChild(meta);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-changeVideoBtn.addEventListener('click', () => {
-    const url = videoUrlInput.value.trim();
-    if (!url) return;
-    
-    const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/);
-    const videoId = match ? match[1] : url;
-
-    if (isOfflineMode) {
-        setupYoutubePlayer(videoId);
-        videoUrlInput.value = '';
-        showToast("PLAYING YOUTUBE VIDEO LINK");
-    } else if (socket) {
-        socket.emit('change-video', { roomId, videoId });
-        videoUrlInput.value = '';
-    }
-});
-
-searchVideoBtn.addEventListener('click', () => {
-    const query = videoUrlInput.value.trim();
-    if (!query) return;
-
-    const mockResults = [
-        { id: 'J---aiyznGQ', title: 'Ghosted Ambient Lofi Vibe', duration: '3:45', author: 'Lofi Records' },
-        { id: 'dQw4w9WgXcQ', title: 'Rick Astley - Never Gonna Give You Up', duration: '3:32', author: 'RickAstleyVEVO' },
-        { id: 'kJQP7kiw5Fk', title: 'Luis Fonsi - Despacito ft. Daddy Yankee', duration: '4:41', author: 'LuisFonsiVEVO' }
-    ];
-
-    displaySearchResults(mockResults);
-});
-
-function displaySearchResults(results) {
-    searchResultsList.innerHTML = '';
-    results.forEach(res => {
-        const item = document.createElement('div');
-        item.className = 'search-item';
-        item.innerHTML = `
-            <img class="search-thumb" src="https://img.youtube.com/vi/${res.id}/mqdefault.jpg">
-            <div class="search-info">
-                <h5>${res.title}</h5>
-                <p>${res.author} • ${res.duration}</p>
-            </div>
-        `;
-        item.addEventListener('click', () => {
-            if (isOfflineMode) {
-                setupYoutubePlayer(res.id);
-                searchResultsOverlay.classList.add('hidden');
-                videoUrlInput.value = '';
-            } else if (socket) {
-                socket.emit('change-video', { roomId, videoId: res.id });
-                searchResultsOverlay.classList.add('hidden');
-                videoUrlInput.value = '';
-            }
-        });
-        searchResultsList.appendChild(item);
-    });
-    searchResultsOverlay.classList.remove('hidden');
-}
-
-document.addEventListener('click', (e) => {
-    if (!searchResultsOverlay.contains(e.target) && e.target !== searchVideoBtn && e.target !== videoUrlInput) {
-        searchResultsOverlay.classList.add('hidden');
-    }
-});
-
-copyLinkBtn.addEventListener('click', () => {
-    const link = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
-    navigator.clipboard.writeText(link).then(() => {
-        showToast("INVITATION LINK COPIED TO CLIPBOARD");
-    });
-});
-
-leaveRoomBtn.addEventListener('click', () => {
-    location.reload();
-});
-
-discoverBtn.addEventListener('click', () => {
-    activeRoomsList.innerHTML = '';
-    activeRooms.forEach(room => {
-        const row = document.createElement('div');
-        row.className = 'room-card';
-        row.innerHTML = `
-            <div class="room-card-info">
-                <h4>${room.name} (${room.id})</h4>
-                <p>GENRE: ${room.genre} • SPIRITS: ${room.pilots.length}</p>
-            </div>
-            <button class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem; margin:0;" onclick="joinDirect('${room.id}')">CONNECT</button>
-        `;
-        activeRoomsList.appendChild(row);
-    });
-    discoverOverlay.classList.remove('hidden');
-});
-
-closeDiscoverBtn.addEventListener('click', () => {
-    discoverOverlay.classList.add('hidden');
-});
-
-window.joinDirect = function(id) {
-    roomIdInput.value = id;
-    discoverOverlay.classList.add('hidden');
-    joinRoomBtn.click();
-};
-
-document.querySelectorAll('.tab-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-        document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-
-        link.classList.add('active');
-        const tabId = link.getAttribute('data-tab');
-        document.getElementById(`${tabId}-tab`).classList.remove('hidden');
-    });
-});
-
-function updatePilotsList(pilots) {
-    pilotsList.innerHTML = '';
-    pilots.forEach(p => {
-        const row = document.createElement('div');
-        row.className = 'pilot-row';
-        row.innerHTML = `
-            <span class="pilot-name">${p.name.toUpperCase()}</span>
-            <span class="pilot-role">${p.role === 'host' ? 'Host' : 'Viewer'}</span>
-        `;
-        pilotsList.appendChild(row);
-    });
-}
-
-// --- 1. INTERACTIVE BACKGROUND STARS ENGINE ---
-const canvas = document.getElementById('particles-canvas');
-const ctx = canvas.getContext('2d');
+// --- 2. STARFIELD & PARTICLE BACKGROUND CANVAS ---
+const fluidCanvas = document.getElementById('fluid-canvas');
+const fluidCtx = fluidCanvas.getContext('2d');
 let stars = [];
-let starsCount = 60;
+const maxStars = 75;
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+function resizeFluidCanvas() {
+  fluidCanvas.width = window.innerWidth;
+  fluidCanvas.height = window.innerHeight;
 }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+window.addEventListener('resize', resizeFluidCanvas);
+resizeFluidCanvas();
 
-class Star {
-    constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = Math.random() * 0.4 - 0.2;
-        this.speedY = Math.random() * 0.4 - 0.2;
-    }
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-    }
-    draw() {
-        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-    }
+class StarParticle {
+  constructor() {
+    this.reset();
+    this.y = Math.random() * fluidCanvas.height;
+  }
+  reset() {
+    this.x = Math.random() * fluidCanvas.width;
+    this.y = fluidCanvas.height + 15;
+    this.size = Math.random() * 2.4 + 0.6;
+    this.speedY = Math.random() * 0.45 + 0.15;
+    this.amplitude = Math.random() * 1.8 + 0.4;
+    this.frequency = Math.random() * 0.005 + 0.001;
+    this.phase = Math.random() * 100;
+    this.alpha = Math.random() * 0.6 + 0.2;
+  }
+  update() {
+    this.y -= this.speedY;
+    this.phase += this.frequency;
+    this.x += Math.sin(this.phase) * this.amplitude * 0.3;
+    if (this.y < -15) this.reset();
+  }
+  draw() {
+    fluidCtx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+    fluidCtx.beginPath();
+    fluidCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    fluidCtx.fill();
+  }
 }
 
-function initStars() {
-    stars = [];
-    for (let i = 0; i < starsCount; i++) {
-        stars.push(new Star());
-    }
+for (let i = 0; i < maxStars; i++) {
+  stars.push(new StarParticle());
 }
-initStars();
 
-function animateStars() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    stars.forEach((star, index) => {
-        star.update();
-        star.draw();
+function animateFluidBackground() {
+  fluidCtx.clearRect(0, 0, fluidCanvas.width, fluidCanvas.height);
+  
+  for (let i = 0; i < stars.length; i++) {
+    stars[i].update();
+    stars[i].draw();
+
+    for (let j = i + 1; j < stars.length; j++) {
+      const dist = Math.hypot(stars[i].x - stars[j].x, stars[i].y - stars[j].y);
+      if (dist < 110) {
+        const alpha = (1 - dist / 110) * 0.12;
+        const config = themeConfigs[currentTheme];
+        const grad = fluidCtx.createLinearGradient(stars[i].x, stars[i].y, stars[j].x, stars[j].y);
+        grad.addColorStop(0, `rgba(${config.primaryRgb}, ${alpha})`);
+        grad.addColorStop(1, `rgba(255, 255, 255, ${alpha * 0.5})`);
         
-        for (let j = index + 1; j < stars.length; j++) {
-            const other = stars[j];
-            const dist = Math.hypot(star.x - other.x, star.y - other.y);
-            if (dist < 100) {
-                ctx.strokeStyle = `rgba(189, 0, 255, ${0.15 - (dist / 100) * 0.15})`;
-                ctx.lineWidth = 0.5;
-                ctx.beginPath();
-                ctx.moveTo(star.x, star.y);
-                ctx.lineTo(other.x, other.y);
-                ctx.stroke();
-            }
-        }
+        fluidCtx.strokeStyle = grad;
+        fluidCtx.lineWidth = 0.7;
+        fluidCtx.beginPath();
+        fluidCtx.moveTo(stars[i].x, stars[i].y);
+        fluidCtx.lineTo(stars[j].x, stars[j].y);
+        fluidCtx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(animateFluidBackground);
+}
+animateFluidBackground();
+
+// --- 3. INTERACTIVE SPARK BURST ENGINE ---
+const sparkCanvas = document.getElementById('spark-canvas');
+const sparkCtx = sparkCanvas.getContext('2d');
+let sparks = [];
+
+function resizeSparkCanvas() {
+  sparkCanvas.width = window.innerWidth;
+  sparkCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeSparkCanvas);
+resizeSparkCanvas();
+
+class Spark {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.size = Math.random() * 3 + 1.5;
+    this.speedX = Math.random() * 7 - 3.5;
+    this.speedY = Math.random() * -7 - 2;
+    this.gravity = 0.14;
+    const config = themeConfigs[currentTheme];
+    this.color = Math.random() > 0.4 ? config.primary : config.secondary;
+    this.alpha = 1.0;
+    this.decay = Math.random() * 0.02 + 0.012;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.speedY += this.gravity;
+    this.alpha -= this.decay;
+  }
+  draw() {
+    sparkCtx.save();
+    sparkCtx.globalAlpha = Math.max(0, this.alpha);
+    sparkCtx.fillStyle = this.color;
+    sparkCtx.shadowColor = this.color;
+    sparkCtx.shadowBlur = 10;
+    sparkCtx.beginPath();
+    sparkCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    sparkCtx.fill();
+    sparkCtx.restore();
+  }
+}
+
+function spawnBurst(x, y, count = 25) {
+  for (let i = 0; i < count; i++) {
+    sparks.push(new Spark(x, y));
+  }
+}
+
+function animateSparks() {
+  sparkCtx.clearRect(0, 0, sparkCanvas.width, sparkCanvas.height);
+  sparks = sparks.filter(s => s.alpha > 0);
+  for (let s of sparks) {
+    s.update();
+    s.draw();
+  }
+  requestAnimationFrame(animateSparks);
+}
+animateSparks();
+
+// --- 4. SMARTPHONE SIMULATOR LOGIC ---
+const hints = {
+  feed: "Whispers gradually blur and vaporize as their 24h decay countdown elapses. Tap 'Echo' or vote on locked payoffs to test.",
+  seance: "Accessible on mobile by tapping the Ghost icon. An encrypted altar where confessions are sealed in digital wax.",
+  chat: "Vapor Bubbles dissolve automatically. Tap the View-Once message to see the 5-second self-destruct timer in action!",
+  watch: "Happy Watch allows dorms to watch YouTube videos in frame-accurate sync. Click reactions to float emojis across the room.",
+  yearbook: "Student spirit profiles with department tags and resonance XP tiers. Level up from Phantom to Void Sovereign."
+};
+
+function setSimulatorTab(tabId) {
+  // Update sidebar controller buttons
+  document.querySelectorAll('.sim-nav-btn').forEach(btn => {
+    if (btn.getAttribute('onclick').includes(tabId)) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  // Update phone bottom nav buttons
+  document.querySelectorAll('.phone-nav-item').forEach(item => {
+    if (item.getAttribute('onclick').includes(tabId)) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+
+  // Switch phone panes
+  document.querySelectorAll('.phone-tab-pane').forEach(pane => {
+    pane.classList.remove('active');
+  });
+  const targetPane = document.getElementById(`pane-${tabId}`);
+  if (targetPane) targetPane.classList.add('active');
+
+  // Update explanation hint
+  const noteEl = document.getElementById('sim-feature-note');
+  if (noteEl && hints[tabId]) {
+    noteEl.textContent = hints[tabId];
+  }
+}
+
+// SIMULATOR MICRO-INTERACTIONS
+function simEcho(btn, event) {
+  const countEl = btn.querySelector('.count');
+  let current = parseInt(countEl.textContent);
+  countEl.textContent = current + 1;
+  btn.style.color = themeConfigs[currentTheme].primary;
+  
+  const rect = btn.getBoundingClientRect();
+  spawnBurst(rect.left + rect.width / 2, rect.top + rect.height / 2, 20);
+}
+
+function simComment(btn) {
+  alert("💬 Comment Thread: Tap into anonymous replies. In the production app, users could comment without exposing any user handle!");
+}
+
+function simShare(event) {
+  spawnBurst(event.clientX, event.clientY, 15);
+  alert("🔗 Whisper link copied to clipboard!");
+}
+
+// Locked Payoff Mechanism
+let payoffVotes = 46;
+const payoffGoal = 50;
+
+function votePayoff() {
+  if (payoffVotes < payoffGoal) {
+    payoffVotes++;
+    document.getElementById('payoff-counter').textContent = `${payoffVotes} / ${payoffGoal}`;
+    const percent = (payoffVotes / payoffGoal) * 100;
+    document.getElementById('demo-payoff-bar').style.width = `${percent}%`;
+
+    if (payoffVotes >= payoffGoal) {
+      document.getElementById('demo-payoff-box').innerHTML = `
+        <div style="padding:10px; background:rgba(39, 201, 63, 0.15); border:1px solid #27C93F; border-radius:10px; text-align:center;">
+          <h5 style="color:#27C93F; font-size:0.85rem; margin-bottom:4px;">🔓 PAYOFF UNLOCKED!</h5>
+          <p style="font-size:0.75rem; color:#DDD;">"It was 3 professors celebrating getting their research grant approved! 🍕🎓"</p>
+        </div>
+      `;
+    }
+  }
+}
+
+// View-Once Photo Self-Destruct Mechanic
+let viewOnceRevealed = false;
+function revealViewOncePhoto() {
+  if (viewOnceRevealed) return;
+  viewOnceRevealed = true;
+
+  const msg = document.getElementById('demo-view-once');
+  const status = document.getElementById('view-once-status');
+  
+  msg.innerHTML = `
+    <div style="padding: 10px; background: rgba(0,0,0,0.7); border-radius: 10px; text-align:center;">
+      <div style="font-size: 2rem; margin-bottom: 4px;">🖼️</div>
+      <p style="font-size: 0.75rem; color:#FFF; font-weight:700;">Secret Midterm Notes Photo</p>
+      <span id="destruct-countdown" style="font-size:0.7rem; color:#FF5555; font-weight:bold;">🔥 Destructing in 5s...</span>
+    </div>
+  `;
+
+  let seconds = 5;
+  const timer = setInterval(() => {
+    seconds--;
+    const countdownEl = document.getElementById('destruct-countdown');
+    if (countdownEl) {
+      countdownEl.textContent = `🔥 Destructing in ${seconds}s...`;
+    }
+    if (seconds <= 0) {
+      clearInterval(timer);
+      msg.innerHTML = `
+        <div style="padding: 10px; text-align:center; color:#777; font-size:0.75rem;">
+          <span>💨 Message vaporized into ash.</span>
+        </div>
+      `;
+      msg.style.opacity = '0.5';
+      msg.style.pointerEvents = 'none';
+    }
+  }, 1000);
+}
+
+// Chat Mock Send
+function sendMockMessage() {
+  const input = document.getElementById('chat-input-box');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const stream = document.getElementById('chat-stream');
+  
+  // User bubble
+  const userBubble = document.createElement('div');
+  userBubble.className = 'msg-bubble outgoing';
+  userBubble.innerHTML = `<p>${text}</p><small>Just now</small>`;
+  stream.appendChild(userBubble);
+  input.value = '';
+  stream.scrollTop = stream.scrollHeight;
+
+  // Bot auto-reply after 1 second
+  setTimeout(() => {
+    const replies = [
+      "Agreed, let's meet near the library atrium.",
+      "That whisper on the Ghost Board earlier was hilarious.",
+      "Did you check Happy Watch room #145 tonight?",
+      "Catch you later in the void!"
+    ];
+    const replyText = replies[Math.floor(Math.random() * replies.length)];
+    const replyBubble = document.createElement('div');
+    replyBubble.className = 'msg-bubble incoming';
+    replyBubble.innerHTML = `<p>${replyText}</p><small>Just now</small>`;
+    stream.appendChild(replyBubble);
+    stream.scrollTop = stream.scrollHeight;
+  }, 900);
+}
+
+// Happy Watch Floating Reactions
+function spawnWatchReaction(emoji) {
+  const container = document.querySelector('.watch-video-container');
+  if (!container) return;
+
+  const el = document.createElement('div');
+  el.textContent = emoji;
+  el.style.position = 'absolute';
+  el.style.bottom = '15px';
+  el.style.left = `${Math.random() * 80 + 10}%`;
+  el.style.fontSize = '1.8rem';
+  el.style.pointerEvents = 'none';
+  el.style.zIndex = '30';
+  el.style.transition = 'all 1.8s cubic-bezier(0.2, 0.8, 0.4, 1)';
+  el.style.opacity = '1';
+
+  container.appendChild(el);
+
+  setTimeout(() => {
+    el.style.transform = `translateY(-110px) scale(${Math.random() * 0.4 + 1.1})`;
+    el.style.opacity = '0';
+  }, 20);
+
+  setTimeout(() => {
+    el.remove();
+  }, 1800);
+}
+
+// Story Modal
+function triggerStoryModal() {
+  const modal = document.getElementById('story-modal');
+  if (modal) modal.classList.add('show');
+}
+
+function closeStoryModal(e) {
+  const modal = document.getElementById('story-modal');
+  if (modal) modal.classList.remove('show');
+}
+
+function openConfessionModal() {
+  alert("🕯️ The Sacred Confession Altar: In Ghosted, students could type any thought, pick a mood stamp (#crush, #exams, #faculty), and melt a digital wax seal before whispering it to campus.");
+}
+
+// --- 5. MATTER.JS PHYSICS PILLS ARENA ---
+let physicsEngine = null;
+let physicsRunner = null;
+let physicsBodies = [];
+
+function initPhysicsArena() {
+  const container = document.getElementById('physics-canvas-container');
+  if (!container || physicsEngine) return;
+
+  const width = container.clientWidth || 800;
+  const height = container.clientHeight || 440;
+
+  const Engine = Matter.Engine,
+        Render = Matter.Render,
+        Runner = Matter.Runner,
+        Bodies = Matter.Bodies,
+        Composite = Matter.Composite,
+        Mouse = Matter.Mouse,
+        MouseConstraint = Matter.MouseConstraint;
+
+  physicsEngine = Engine.create({ gravity: { y: 0.7 } });
+
+  const render = Render.create({
+    element: container,
+    engine: physicsEngine,
+    options: {
+      width: width,
+      height: height,
+      background: 'transparent',
+      wireframes: false,
+      showVelocity: false
+    }
+  });
+
+  Render.run(render);
+  physicsRunner = Runner.create();
+  Runner.run(physicsRunner, physicsEngine);
+
+  // Boundaries
+  const ground = Bodies.rectangle(width / 2, height + 25, width, 50, { isStatic: true });
+  const leftWall = Bodies.rectangle(-25, height / 2, 50, height, { isStatic: true });
+  const rightWall = Bodies.rectangle(width + 25, height / 2, 50, height, { isStatic: true });
+  Composite.add(physicsEngine.world, [ground, leftWall, rightWall]);
+
+  // Pill Labels
+  const tagLabels = [
+    "#ADANI_UNI", "#GHOSTED", "#SEANCE", "#HAPPY_WATCH",
+    "#ICT_MIDTERMS", "#VOID_SOVEREIGN", "#RESONANCE_XP",
+    "#LIBRARY_3RD_FLOOR", "#WAX_SEAL", "#CONFESSIONS",
+    "#VAPOR_BUBBLE", "#HOSTEL_NIGHTS", "#CAMPUS_VOICE"
+  ];
+
+  tagLabels.forEach((label, i) => {
+    const x = Math.random() * (width - 180) + 90;
+    const y = -50 - (i * 35);
+    const pill = Bodies.rectangle(x, y, 140, 42, {
+      chamfer: { radius: 21 },
+      restitution: 0.65,
+      friction: 0.1,
+      render: {
+        fillStyle: 'rgba(255, 255, 255, 0.04)',
+        strokeStyle: themeConfigs[currentTheme].primary,
+        lineWidth: 2
+      }
     });
-    requestAnimationFrame(animateStars);
-}
-animateStars();
+    pill.tagLabel = label;
+    physicsBodies.push(pill);
+    Composite.add(physicsEngine.world, pill);
+  });
 
-// --- 2. 3D TILT EFFECT ON CARD ELEMENTS ---
-const tiltCard = document.getElementById('3d-hero-card');
-const wrapper = document.getElementById('hero-card-wrapper');
+  // Render text on bodies
+  Matter.Events.on(render, 'afterRender', () => {
+    const ctx = render.context;
+    ctx.font = 'bold 12px Outfit, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#FFFFFF';
 
-if (wrapper && tiltCard) {
-    wrapper.addEventListener('mousemove', (e) => {
-        const rect = wrapper.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        
-        const rotateX = -(y / rect.height) * 15;
-        const rotateY = (x / rect.width) * 15;
-        
-        tiltCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`;
+    physicsBodies.forEach(body => {
+      if (body.tagLabel) {
+        ctx.save();
+        ctx.translate(body.position.x, body.position.y);
+        ctx.rotate(body.angle);
+        ctx.fillText(body.tagLabel, 0, 0);
+        ctx.restore();
+      }
     });
+  });
+
+  // Mouse Drag Constraint
+  const mouse = Mouse.create(render.canvas);
+  const mouseConstraint = MouseConstraint.create(physicsEngine, {
+    mouse: mouse,
+    constraint: {
+      stiffness: 0.25,
+      render: { visible: false }
+    }
+  });
+  Composite.add(physicsEngine.world, mouseConstraint);
+  render.mouse = mouse;
+
+  // Click to spawn
+  container.addEventListener('click', (e) => {
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     
-    wrapper.addEventListener('mouseleave', () => {
-        tiltCard.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+    // Spawn if not clicking a body
+    const extraPill = Bodies.rectangle(x, y, 120, 38, {
+      chamfer: { radius: 19 },
+      restitution: 0.7,
+      render: {
+        fillStyle: 'rgba(255, 255, 255, 0.06)',
+        strokeStyle: themeConfigs[currentTheme].secondary,
+        lineWidth: 2
+      }
     });
+    extraPill.tagLabel = "#WHISPER";
+    physicsBodies.push(extraPill);
+    Composite.add(physicsEngine.world, extraPill);
+    spawnBurst(e.clientX, e.clientY, 15);
+  });
 }
 
-document.querySelectorAll('.3d-tilt-hover').forEach(btn => {
-    btn.addEventListener('mousemove', (e) => {
-        const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        btn.style.transform = `scale(1.05) translate(${x*0.1}px, ${y*0.1}px)`;
-    });
-    btn.addEventListener('mouseleave', () => {
-        btn.style.transform = '';
-    });
+function updatePhysicsColors() {
+  if (!physicsBodies.length) return;
+  const config = themeConfigs[currentTheme];
+  physicsBodies.forEach((body, idx) => {
+    body.render.strokeStyle = idx % 2 === 0 ? config.primary : config.secondary;
+  });
+}
+
+function resetPhysicsArena() {
+  const container = document.getElementById('physics-canvas-container');
+  if (container) {
+    container.innerHTML = '';
+    physicsEngine = null;
+    physicsRunner = null;
+    physicsBodies = [];
+    initPhysicsArena();
+  }
+}
+
+// Initialize Physics Arena when scrolled near
+window.addEventListener('load', () => {
+  initPhysicsArena();
 });
-
-// --- 3. MATTER.JS PHYSICS PILLS ---
-function initLandingPhysics() {
-    const holder = document.getElementById('physics-canvas-holder');
-    if (!holder) return;
-
-    holder.innerHTML = ''; // clear
-
-    const width = holder.clientWidth || 800;
-    const height = holder.clientHeight || 140;
-
-    const Engine = Matter.Engine,
-          Render = Matter.Render,
-          Runner = Matter.Runner,
-          Bodies = Matter.Bodies,
-          Composite = Matter.Composite,
-          Mouse = Matter.Mouse,
-          MouseConstraint = Matter.MouseConstraint;
-
-    const engine = Engine.create({ gravity: { y: 0.4 } });
-    
-    const render = Render.create({
-        element: holder,
-        engine: engine,
-        options: {
-            width: width,
-            height: height,
-            background: 'transparent',
-            wireframes: false
-        }
-    });
-
-    Render.run(render);
-    const runner = Runner.create();
-    Runner.run(runner, engine);
-
-    const ground = Bodies.rectangle(width/2, height + 15, width, 30, { isStatic: true });
-    const leftWall = Bodies.rectangle(-15, height/2, 30, height, { isStatic: true });
-    const rightWall = Bodies.rectangle(width + 15, height/2, 30, height, { isStatic: true });
-    Composite.add(engine.world, [ground, leftWall, rightWall]);
-
-    const tags = ["GHOSTED", "THE VOID", "HAPPY WATCH", "SOULMATCH", "RESONANCE", "ANONYMOUS"];
-    const colors = ['#BD00FF', '#00FFFF', '#FF8700', '#FF007F'];
-
-    for (let i = 0; i < tags.length; i++) {
-        const x = (width / tags.length) * i + 50;
-        const y = Math.random() * -100 - 30;
-        const color = colors[i % colors.length];
-        const tag = tags[i];
-
-        const pill = Bodies.rectangle(x, y, 110, 32, {
-            chamfer: { radius: 16 },
-            restitution: 0.6,
-            friction: 0.1,
-            render: {
-                fillStyle: 'rgba(255, 255, 255, 0.02)',
-                strokeStyle: color,
-                lineWidth: 1.5
-            }
-        });
-
-        pill.customRender = (context) => {
-            context.fillStyle = color;
-            context.font = '800 10px Outfit';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(tag, pill.position.x, pill.position.y);
-        };
-
-        Composite.add(engine.world, pill);
-    }
-
-    Matter.Events.on(render, 'afterRender', () => {
-        const context = render.context;
-        const bodies = Composite.allBodies(engine.world);
-        bodies.forEach(b => {
-            if (b.customRender) b.customRender(context);
-        });
-    });
-
-    const mouse = Mouse.create(render.canvas);
-    const constraint = MouseConstraint.create(engine, {
-        mouse: mouse,
-        constraint: { stiffness: 0.2, render: { visible: false } }
-    });
-    Composite.add(engine.world, constraint);
-}
-window.addEventListener('load', initLandingPhysics);
-
-// --- 4. LIQUID GLASS REFRACTION LENS ---
-const playerBox = document.getElementById('player-box-card');
-const refractionLens = document.getElementById('refraction-lens');
-
-if (playerBox && refractionLens) {
-    playerBox.addEventListener('mousemove', (e) => {
-        const rect = playerBox.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        refractionLens.style.display = 'block';
-        refractionLens.style.left = `${x}px`;
-        refractionLens.style.top = `${y}px`;
-    });
-
-    playerBox.addEventListener('mouseleave', () => {
-        refractionLens.style.display = 'none';
-    });
-}
-
-// --- 5. VISUAL TWEAK BAR EVENTS & LOGIC ---
-const tweakBar = document.getElementById('tweak-bar');
-const tweakBarToggle = document.getElementById('tweak-bar-toggle');
-
-tweakBarToggle.addEventListener('click', () => {
-    tweakBar.classList.toggle('collapsed');
-});
-
-// Preset Taste Configs
-const presets = {
-    ghosted: {
-        primary: '#BD00FF',
-        accent: '#FF8700',
-        cyan: '#00FFFF',
-        bg: '#050508'
-    },
-    cyber: {
-        primary: '#FF007F',
-        accent: '#00FFFF',
-        cyan: '#FFFF00',
-        bg: '#0a000a'
-    },
-    matrix: {
-        primary: '#00FF00',
-        accent: '#008000',
-        cyan: '#00FF66',
-        bg: '#000800'
-    },
-    mono: {
-        primary: '#FFFFFF',
-        accent: '#888888',
-        cyan: '#CCCCCC',
-        bg: '#0f0f0f'
-    }
-};
-
-window.setPreset = function(name) {
-    document.querySelectorAll('.preset-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('onclick').includes(name)) btn.classList.add('active');
-    });
-
-    const p = presets[name];
-    if (p) {
-        document.documentElement.style.setProperty('--primary', p.primary);
-        document.documentElement.style.setProperty('--accent', p.accent);
-        document.documentElement.style.setProperty('--cyan', p.cyan);
-        document.documentElement.style.setProperty('--bg', p.bg);
-        showToast(`LOADED ${name.toUpperCase()} PRESET`);
-    }
-};
-
-window.updateTweakFont = function(fontFamily) {
-    document.body.style.fontFamily = fontFamily;
-};
-
-window.updateGlow = function(val) {
-    document.getElementById('tweak-glow-val').innerText = val + 'px';
-    document.documentElement.style.setProperty('--primary-glow', `rgba(189, 0, 255, ${val/100})`);
-    document.documentElement.style.setProperty('--cyan-glow', `rgba(0, 255, 255, ${val/100})`);
-};
-
-window.updateBlur = function(val) {
-    document.getElementById('tweak-blur-val').innerText = val + 'px';
-    document.documentElement.style.setProperty('--backdrop-blur', val + 'px');
-};
-
-window.updateRadius = function(val) {
-    document.getElementById('tweak-radius-val').innerText = val + 'px';
-    document.documentElement.style.setProperty('--border-radius', val + 'px');
-};
-
-window.updateStarsCount = function(val) {
-    document.getElementById('tweak-stars-val').innerText = val;
-    starsCount = parseInt(val);
-    initStars();
-};
-
-// --- SOCKET EVENTS ---
-if (socket) {
-    socket.on('room-update', (data) => {
-        updatePilotsList(data.pilots);
-    });
-    socket.on('state-change', (data) => {
-        if (!player) return;
-        isInternalChange = true;
-        const myTime = player.getCurrentTime();
-        if (Math.abs(myTime - data.time) > 1.5) {
-            player.seekTo(data.time, true);
-        }
-        if (data.state === YT.PlayerState.PLAYING) {
-            player.playVideo();
-        } else if (data.state === YT.PlayerState.PAUSED) {
-            player.pauseVideo();
-        }
-        isInternalChange = false;
-    });
-    socket.on('chat-message', (data) => {
-        appendMessage(data.sender, data.message, data.sender === nickname);
-    });
-    socket.on('reaction', (data) => {
-        triggerFloatingEmoji(data.emoji);
-    });
-    socket.on('change-video', (data) => {
-        setupYoutubePlayer(data.videoId);
-        showToast("SYNCED NEW VIDEO IN SPACE");
-    });
-}
