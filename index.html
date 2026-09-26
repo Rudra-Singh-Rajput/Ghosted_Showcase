@@ -2,519 +2,402 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Ghosted 👻 | Official Public Showcase & Interactive Demo</title>
-  <meta name="description" content="Explore Ghosted: The anonymous, high-fidelity social network built for university students with ephemeral whispers, Hauwa confessions, Happy Watch sync, and resonance XP.">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghosted 👻 | Anonymous Campus App Demo</title>
+  <meta name="description" content="Ghosted: An anonymous campus social web application built with Flutter and Firebase by Rudra Singh Rajput at Adani University.">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;1,600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <!-- Matter.js for physics playground -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 </head>
-<body class="theme-ghosted">
+<body>
 
-  <!-- Ambient Glow Blobs -->
-  <div class="glow-orb orb-primary"></div>
-  <div class="glow-orb orb-secondary"></div>
-
-  <!-- TOP ARCHIVAL NOTICE -->
-  <aside class="archive-bar">
-    <div class="archive-content">
-      <span class="pulse-dot"></span>
-      <span class="archive-text"><strong>Project Archive:</strong> The live production service has concluded. This public showcase serves as the permanent interactive demo & engineering portfolio.</span>
-      <a href="https://ghosted-2c50e.web.app" target="_blank" class="archive-link">Visit Farewell Landing Page →</a>
-    </div>
-  </aside>
-
-  <!-- NAVBAR -->
-  <header class="navbar glass">
-    <div class="nav-brand">
-      <div class="brand-ghost">👻</div>
-      <div class="brand-info">
-        <span class="brand-title">GHOSTED</span>
-        <span class="brand-badge">PUBLIC DEMO</span>
-      </div>
-    </div>
-
-    <nav class="nav-menu">
-      <a href="#simulator" class="nav-item">Interactive Demo</a>
-      <a href="#features" class="nav-item">Features</a>
-      <a href="#visuals" class="nav-item">UI Visuals</a>
-      <a href="#architecture" class="nav-item">Architecture</a>
-      <a href="#physics" class="nav-item">Tag Arena</a>
-    </nav>
-
-    <div class="nav-actions">
-      <!-- Theme Switcher -->
-      <div class="theme-dropdown">
-        <button class="theme-btn" id="theme-btn" title="Switch Theme">
-          <span class="theme-color-dot"></span>
-          <span class="theme-name">Ghosted (Orange)</span>
-          <span class="theme-caret">▾</span>
-        </button>
-        <div class="theme-menu" id="theme-menu">
-          <button class="theme-opt active" onclick="setTheme('ghosted')"><span class="dot dot-ghosted"></span> Ghosted (Warm Ember)</button>
-          <button class="theme-opt" onclick="setTheme('cosmic')"><span class="dot dot-cosmic"></span> Cosmic (Nebula Purple)</button>
-          <button class="theme-opt" onclick="setTheme('aurora')"><span class="dot dot-aurora"></span> Aurora (Emerald Teal)</button>
-          <button class="theme-opt" onclick="setTheme('comic')"><span class="dot dot-comic"></span> Comic (Graphic Halftone)</button>
-        </div>
-      </div>
-
-      <a href="https://github.com/Rudra-Singh-Rajput/ghosted" target="_blank" class="github-btn glass">
-        <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-        </svg>
-        GitHub
+  <!-- Minimal Header -->
+  <header class="header">
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <span class="brand-ghost">👻</span>
+        <span class="brand-name">Ghosted</span>
+        <span class="brand-badge">Demo</span>
       </a>
+
+      <nav class="nav-links">
+        <a href="#demo" class="nav-link">Interactive Demo</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#tech" class="nav-link">Tech Stack</a>
+        <a href="#learnings" class="nav-link">Learnings</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="https://github.com/Rudra-Singh-Rajput/Ghosted_Showcase" target="_blank" rel="noopener" class="btn-github">
+          <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          GitHub Repo
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- HERO SECTION -->
-  <section class="hero-section">
-    <div class="hero-badge">
-      <span class="sparkle">✨</span> ADANI UNIVERSITY CAMPUS INNOVATION
-    </div>
-    
-    <h1 class="hero-title">
-      Where Campus Whispers <br>
-      <span class="gradient-text">Found Their True Voice.</span>
-    </h1>
-
-    <p class="hero-subtitle">
-      Ghosted is a high-fidelity, anonymous campus network engineered in <strong>Flutter & Firebase</strong>.
-      Designed with ethereal glassmorphism, vaporizing content, secret séance portals, and synchronized dorm cinema.
-    </p>
-
-    <div class="hero-cta-group">
-      <a href="#simulator" class="btn-primary">
-        <span>📱</span> Launch Interactive App Demo
-      </a>
-      <a href="#features" class="btn-secondary">
-        <span>⚡</span> Explore Core Features
-      </a>
-    </div>
-
-    <!-- Hero Showcase Image Frame -->
-    <div class="hero-showcase-frame glass">
-      <div class="frame-bar">
-        <div class="frame-dots">
-          <span class="dot-red"></span>
-          <span class="dot-yellow"></span>
-          <span class="dot-green"></span>
-        </div>
-        <span class="frame-title">GHOSTED • Mobile & Web Experience Matrix</span>
-        <span class="frame-tag">PROD BUILD</span>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        Adani University College Project • Archived
       </div>
-      <div class="frame-media">
-        <img src="assets/hero_showcase.jpg" alt="Ghosted App Showcase Hero" class="showcase-img">
+
+      <h1 class="hero-title">
+        An anonymous campus app, <br>
+        <span class="highlight">built for honest connection.</span>
+      </h1>
+
+      <p class="hero-desc">
+        Ghosted was my first full-stack project—built with Flutter and Firebase so students could share thoughts, ask questions, and chat without the awkwardness of follower counts or social pressure.
+      </p>
+
+      <div class="hero-cta">
+        <a href="#demo" class="btn-primary">Try Interactive Simulator</a>
+        <a href="https://ghosted-2c50e.web.app" target="_blank" rel="noopener" class="btn-subtle">Farewell Page →</a>
       </div>
     </div>
   </section>
 
-  <!-- QUICK STATS BAR -->
-  <section class="stats-counter-strip">
-    <div class="stat-card glass">
-      <span class="stat-icon">👻</span>
-      <div class="stat-data">
-        <span class="stat-number">100%</span>
-        <span class="stat-desc">Zero Real Identity Traced</span>
-      </div>
-    </div>
-    <div class="stat-card glass">
-      <span class="stat-icon">⏳</span>
-      <div class="stat-data">
-        <span class="stat-number">24 Hours</span>
-        <span class="stat-desc">Automatic Content Vaporization</span>
-      </div>
-    </div>
-    <div class="stat-card glass">
-      <span class="stat-icon">🎬</span>
-      <div class="stat-data">
-        <span class="stat-number">&lt;50ms</span>
-        <span class="stat-desc">Happy Watch Playback Sync</span>
-      </div>
-    </div>
-    <div class="stat-card glass">
-      <span class="stat-icon">⚡</span>
-      <div class="stat-data">
-        <span class="stat-number">4 Themes</span>
-        <span class="stat-desc">Ember, Cosmic, Aurora, Comic</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================== -->
-  <!-- SECTION: LIVE INTERACTIVE PHONE SIMULATOR -->
-  <!-- ============================================== -->
-  <section id="simulator" class="section-container">
-    <div class="section-header">
-      <span class="section-tag">LIVE DEMO EXPERIENCE</span>
-      <h2 class="section-title">Interactive Smartphone Simulator</h2>
-      <p class="section-desc">Test every primary screen directly from your browser. Click tabs and interact with real mock mechanics.</p>
+  <!-- Interactive App Demo Section -->
+  <section id="demo" class="section">
+    <div class="section-head">
+      <span class="subhead">HANDS-ON SIMULATOR</span>
+      <h2>Explore the app UI</h2>
+      <p>Test the screens and core interactions directly inside this simulated phone.</p>
     </div>
 
-    <div class="simulator-wrapper">
-      
-      <!-- Controller Sidebar -->
-      <div class="sim-controls glass">
-        <h3>🧭 Screen Selector</h3>
-        <p class="sim-hint">Choose a screen to test simulated app states:</p>
+    <div class="demo-layout">
+      <!-- Selector buttons on side -->
+      <div class="screen-selector">
+        <button class="selector-btn active" onclick="switchPhoneTab('feed')">
+          <span class="icon">💬</span>
+          <div class="text">
+            <strong>Campus Feed</strong>
+            <small>24h decaying whispers & secret unlocks</small>
+          </div>
+        </button>
 
-        <div class="sim-nav-buttons">
-          <button class="sim-nav-btn active" onclick="setSimulatorTab('feed')">
-            <span class="icon">👻</span>
-            <div>
-              <strong>The Ghost Board</strong>
-              <small>Decaying whispers & vote payoffs</small>
-            </div>
-          </button>
+        <button class="selector-btn" onclick="switchPhoneTab('confessions')">
+          <span class="icon">🕯️</span>
+          <div class="text">
+            <strong>Confessions (Hauwa)</strong>
+            <small>Categorized anonymous campus notes</small>
+          </div>
+        </button>
 
-          <button class="sim-nav-btn" onclick="setSimulatorTab('seance')">
-            <span class="icon">🕯️</span>
-            <div>
-              <strong>Séance & Hauwa</strong>
-              <small>Anonymous campus confession wall</small>
-            </div>
-          </button>
+        <button class="selector-btn" onclick="switchPhoneTab('chat')">
+          <span class="icon">🔒</span>
+          <div class="text">
+            <strong>Ephemeral Chat</strong>
+            <small>Self-destructing text & 5s photo reveal</small>
+          </div>
+        </button>
 
-          <button class="sim-nav-btn" onclick="setSimulatorTab('chat')">
-            <span class="icon">💬</span>
-            <div>
-              <strong>Vapor Chat & View-Once</strong>
-              <small>Dissolving bubbles & 5s media</small>
-            </div>
-          </button>
+        <button class="selector-btn" onclick="switchPhoneTab('watch')">
+          <span class="icon">🎬</span>
+          <div class="text">
+            <strong>Happy Watch</strong>
+            <small>Synchronized video party with live chat</small>
+          </div>
+        </button>
 
-          <button class="sim-nav-btn" onclick="setSimulatorTab('watch')">
-            <span class="icon">🎬</span>
-            <div>
-              <strong>Happy Watch Cinema</strong>
-              <small>Synchronized video party room</small>
-            </div>
-          </button>
+        <button class="selector-btn" onclick="switchPhoneTab('yearbook')">
+          <span class="icon">📖</span>
+          <div class="text">
+            <strong>Yearbook & Streaks</strong>
+            <small>Department filters & anonymous avatars</small>
+          </div>
+        </button>
 
-          <button class="sim-nav-btn" onclick="setSimulatorTab('yearbook')">
-            <span class="icon">📖</span>
-            <div>
-              <strong>Yearbook & Resonance</strong>
-              <small>Spirit avatars & XP spectral ranks</small>
-            </div>
-          </button>
-        </div>
-
-        <div class="sim-feature-highlight glass">
-          <h4>💡 Active Mechanism</h4>
-          <p id="sim-feature-note">Whispers gradually blur and vaporize as their 24h decay countdown elapses. Tap "Echo" or vote on locked payoffs to test.</p>
+        <div class="screen-info-card">
+          <span class="info-tag">FEATURE SPOTLIGHT</span>
+          <p id="feature-description">
+            Whispers naturally fade over 24 hours to keep the board temporary. Tap "Echo" to upvote or vote on the locked post below.
+          </p>
         </div>
       </div>
 
-      <!-- Smartphone Mockup Device -->
-      <div class="phone-mockup">
-        <div class="phone-notch">
-          <div class="speaker"></div>
-          <div class="camera"></div>
-        </div>
+      <!-- Phone Mockup Device -->
+      <div class="phone-frame">
+        <div class="phone-speaker"></div>
 
-        <!-- Phone Screen Content -->
-        <div class="phone-screen" id="phone-screen">
+        <div class="phone-inner">
           
-          <!-- STATUS BAR -->
-          <div class="phone-statusbar">
+          <!-- Status Bar -->
+          <div class="status-bar">
             <span>9:41</span>
-            <div class="status-icons">
-              <span>📶</span>
+            <div class="status-right">
               <span>5G</span>
-              <span>🔋 98%</span>
+              <span>🔋 96%</span>
             </div>
           </div>
 
-          <!-- TAB 1: GHOST BOARD FEED -->
-          <div class="phone-tab-pane active" id="pane-feed">
-            <div class="phone-topbar">
-              <span class="app-logo">👻 GHOSTED</span>
-              <div class="top-icons">
-                <span class="badge-streak">🔥 14d</span>
-                <span class="icon-ring">🔔</span>
-              </div>
+          <!-- SCREEN 1: FEED -->
+          <div class="phone-screen active" id="screen-feed">
+            <div class="phone-header">
+              <span class="title">👻 Ghosted Feed</span>
+              <span class="pill-mini">Adani Uni</span>
             </div>
 
-            <!-- Stories Carousel Strip -->
-            <div class="sim-stories-strip">
-              <div class="story-circle add-story">
-                <span>+</span>
-                <small>You</small>
+            <div class="phone-content">
+              <!-- Stories row -->
+              <div class="stories-row">
+                <div class="story-item story-add">
+                  <div class="story-avatar">+</div>
+                  <span>You</span>
+                </div>
+                <div class="story-item story-active">
+                  <div class="story-avatar">👻</div>
+                  <span>ICT</span>
+                </div>
+                <div class="story-item story-active">
+                  <div class="story-avatar">☕</div>
+                  <span>Canteen</span>
+                </div>
+                <div class="story-item">
+                  <div class="story-avatar">📚</div>
+                  <span>Library</span>
+                </div>
               </div>
-              <div class="story-circle active-story" onclick="triggerStoryModal()">
-                <span class="story-avatar">👻</span>
-                <small>#ICT24</small>
-              </div>
-              <div class="story-circle active-story" onclick="triggerStoryModal()">
-                <span class="story-avatar">✨</span>
-                <small>Library</small>
-              </div>
-              <div class="story-circle" onclick="triggerStoryModal()">
-                <span class="story-avatar">🔮</span>
-                <small>Hostel-B</small>
-              </div>
-            </div>
 
-            <!-- Feed Post 1 (Decaying Whisper) -->
-            <div class="phone-post glass" id="demo-post-1">
-              <div class="post-meta">
-                <div class="post-user">
-                  <span class="mini-avatar">👻</span>
-                  <div>
-                    <h5>Ghost #4892 <span class="badge-dept">ICT</span></h5>
-                    <span class="time-decay">⏳ 4.2h left • Fading</span>
+              <!-- Post 1 -->
+              <div class="post-card">
+                <div class="post-top">
+                  <div class="author">
+                    <span class="avatar-tag">👻</span>
+                    <div>
+                      <strong>Ghost #4120</strong>
+                      <small class="time-fading">⏳ 3.5h left • Fading</small>
+                    </div>
                   </div>
+                  <span class="dept-tag">ICT</span>
                 </div>
-                <span class="post-opt">•••</span>
+                <p class="post-text">Has anyone solved Question 4 in Operating Systems assignment? The deadlocks explanation makes no sense.</p>
+                <div class="post-actions">
+                  <button class="action-btn" onclick="mockEcho(this)">
+                    <span>✨</span> Echo <span class="echo-count">34</span>
+                  </button>
+                  <button class="action-btn" onclick="mockComment()">
+                    <span>💬</span> 8 replies
+                  </button>
+                </div>
               </div>
-              <p class="post-text">Has anyone else noticed the campus library 3rd floor gets eerily quiet around 8 PM? Perfect spot to question your major in peace lol.</p>
-              <div class="post-actions">
-                <button class="post-btn" onclick="simEcho(this, event)">
-                  <span>✨</span> Echo <b class="count">48</b>
-                </button>
-                <button class="post-btn" onclick="simComment(this)">
-                  <span>💬</span> 12
-                </button>
-                <button class="post-btn" onclick="simShare(event)">
-                  <span>↗</span>
-                </button>
-              </div>
-            </div>
 
-            <!-- Feed Post 2 (Locked Secret Payoff) -->
-            <div class="phone-post glass post-payoff">
-              <div class="post-meta">
-                <div class="post-user">
-                  <span class="mini-avatar" style="background:#BD00FF;">🔒</span>
-                  <div>
-                    <h5>Ghost #0112 <span class="badge-dept">DESIGN</span></h5>
-                    <span class="time-decay">Locked Secret Payoff</span>
+              <!-- Post 2 (Locked Secret) -->
+              <div class="post-card post-locked">
+                <div class="post-top">
+                  <div class="author">
+                    <span class="avatar-tag locked">🔒</span>
+                    <div>
+                      <strong>Ghost #8911</strong>
+                      <small>Locked Mystery</small>
+                    </div>
                   </div>
+                  <span class="dept-tag">CAMPUS</span>
                 </div>
-                <span class="badge-locked">LOCKED</span>
-              </div>
-              <p class="post-text">I know who ordered 35 pizzas to the faculty lounge during mid-terms. Vote below to unlock the reveal!</p>
-              
-              <div class="payoff-box glass" id="demo-payoff-box">
-                <div class="progress-info">
-                  <span>Goal: 50 Votes</span>
-                  <span id="payoff-counter">46 / 50</span>
+                <p class="post-text">I know why the library 3rd floor was closed yesterday. Vote to unlock the reason!</p>
+                <div class="poll-box">
+                  <div class="poll-header">
+                    <span>Community votes needed</span>
+                    <span id="vote-count">48 / 50</span>
+                  </div>
+                  <div class="poll-bar">
+                    <div class="poll-fill" id="poll-fill" style="width: 96%;"></div>
+                  </div>
+                  <button class="btn-vote" id="vote-btn" onclick="mockVote()">Vote to Reveal (+1)</button>
                 </div>
-                <div class="progress-track">
-                  <div class="progress-bar" id="demo-payoff-bar" style="width: 92%;"></div>
-                </div>
-                <button class="btn-vote" id="demo-vote-btn" onclick="votePayoff()">
-                  🔓 VOTE TO REVEAL (+1)
-                </button>
               </div>
             </div>
           </div>
 
-          <!-- TAB 2: SEANCE & HAUWA CONFESSIONS -->
-          <div class="phone-tab-pane" id="pane-seance">
-            <div class="phone-topbar">
-              <span class="app-logo">🕯️ SÉANCE & HAUWA</span>
-              <button class="btn-new-confess" onclick="openConfessionModal()">+ Whisper</button>
+          <!-- SCREEN 2: CONFESSIONS (HAUWA) -->
+          <div class="phone-screen" id="screen-confessions">
+            <div class="phone-header">
+              <span class="title">🕯️ Hauwa Board</span>
+              <button class="btn-mini-add" onclick="mockConfessAlert()">+ Write</button>
             </div>
 
-            <div class="seance-banner glass">
-              <div class="wax-seal">👻</div>
-              <div>
-                <h4>Sacred Confession Altar</h4>
-                <p>Spoken into the veil. Wax-stamped & anonymous.</p>
+            <div class="phone-content">
+              <div class="category-pills">
+                <span class="pill-chip active">All</span>
+                <span class="pill-chip">#Hostel</span>
+                <span class="pill-chip">#Exams</span>
+                <span class="pill-chip">#Crush</span>
               </div>
-            </div>
 
-            <div class="confession-filter">
-              <span class="filter-pill active">All</span>
-              <span class="filter-pill">#Crush</span>
-              <span class="filter-pill">#Exams</span>
-              <span class="filter-pill">#Faculty</span>
-              <span class="filter-pill">#Hostel</span>
-            </div>
+              <div class="confession-card">
+                <div class="conf-head">
+                  <span class="conf-id">#1290</span>
+                  <span class="conf-tag">#EXAMS</span>
+                </div>
+                <p class="conf-body">"I'm terrified of semester finals but I pretend to have everything under control so my study group stays calm."</p>
+                <div class="conf-foot">
+                  <span>🕯️ 72 candles lit</span>
+                  <span>💬 14 notes</span>
+                </div>
+              </div>
 
-            <div class="confession-card glass">
-              <div class="confession-header">
-                <span class="confession-num">#2190</span>
-                <span class="confession-stamp">WAX SEALED</span>
-              </div>
-              <p class="confession-body">"I'm drowning in my assignments but always smiling so my roommates don't worry. If you're reading this, grab some chai, you're doing great."</p>
-              <div class="confession-footer">
-                <span>🕯️ 84 Lit Candles</span>
-                <span>💬 19 Whispers</span>
-              </div>
-            </div>
-
-            <div class="confession-card glass">
-              <div class="confession-header">
-                <span class="confession-num">#2194</span>
-                <span class="confession-stamp tag-crush">#CRUSH</span>
-              </div>
-              <p class="confession-body">"To the person wearing the oversized brown corduroy jacket who leaves notes in library booth 4: your handwriting is beautiful."</p>
-              <div class="confession-footer">
-                <span>🕯️ 142 Lit Candles</span>
-                <span>💬 31 Whispers</span>
+              <div class="confession-card">
+                <div class="conf-head">
+                  <span class="conf-id">#1294</span>
+                  <span class="conf-tag">#HOSTEL</span>
+                </div>
+                <p class="conf-body">"To whoever left the cold coffee outside Room 302 with the sticky note—you made my entire week."</p>
+                <div class="conf-foot">
+                  <span>🕯️ 118 candles lit</span>
+                  <span>💬 22 notes</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- TAB 3: VAPOR CHAT & VIEW-ONCE -->
-          <div class="phone-tab-pane" id="pane-chat">
-            <div class="phone-topbar">
-              <div class="chat-peer">
-                <span class="chat-avatar">👻</span>
-                <div>
-                  <h5>Ghost #8901</h5>
-                  <span class="online-indicator">● Active Vapor Channel</span>
-                </div>
-              </div>
-              <span class="destruct-timer">⏳ 24h TTL</span>
+          <!-- SCREEN 3: CHAT -->
+          <div class="phone-screen" id="screen-chat">
+            <div class="phone-header">
+              <span class="title">🔒 Ghost #2904</span>
+              <span class="ttl-badge">24h TTL</span>
             </div>
 
-            <div class="chat-messages" id="chat-stream">
-              <div class="msg-bubble incoming">
-                <p>Hey, did you catch the lecture slides for OS?</p>
-                <small>11:14 PM</small>
+            <div class="phone-content chat-content">
+              <div class="chat-bubble incoming">
+                <p>Hey, did you submit the DBMS report?</p>
+                <small>10:14 PM</small>
               </div>
-              <div class="msg-bubble outgoing">
-                <p>Yeah! Sent them to the void thread. They disappear by midnight though.</p>
-                <small>11:15 PM</small>
+
+              <div class="chat-bubble outgoing">
+                <p>Yeah, uploaded it 5 mins before the deadline 😅</p>
+                <small>10:15 PM</small>
               </div>
-              
-              <!-- View-Once Photo Demo -->
-              <div class="msg-bubble incoming view-once-msg" id="demo-view-once" onclick="revealViewOncePhoto()">
-                <div class="view-once-preview">
-                  <span class="eye-icon">👁️</span>
+
+              <!-- View once mock -->
+              <div class="chat-bubble incoming view-once-bubble" id="view-once-box" onclick="mockViewOnce()">
+                <div class="view-once-content">
+                  <span class="eye">👁️</span>
                   <div>
                     <strong>View-Once Image</strong>
-                    <small id="view-once-status">Tap to view (Self-destructs in 5s)</small>
+                    <small id="view-once-text">Tap to view (Destructs in 5s)</small>
                   </div>
                 </div>
               </div>
+
+              <div class="chat-stream-bottom" id="chat-stream"></div>
             </div>
 
             <div class="chat-input-bar">
-              <input type="text" id="chat-input-box" placeholder="Vapor whisper..." onkeydown="if(event.key==='Enter') sendMockMessage()">
-              <button class="send-btn" onclick="sendMockMessage()">➤</button>
+              <input type="text" id="chat-box" placeholder="Ephemeral message..." onkeydown="if(event.key==='Enter') mockSendChat()">
+              <button class="btn-chat-send" onclick="mockSendChat()">➤</button>
             </div>
           </div>
 
-          <!-- TAB 4: HAPPY WATCH CINEMA -->
-          <div class="phone-tab-pane" id="pane-watch">
-            <div class="phone-topbar">
-              <span class="app-logo">🎬 HAPPY WATCH</span>
-              <span class="party-badge">ROOM #145</span>
+          <!-- SCREEN 4: WATCH -->
+          <div class="phone-screen" id="screen-watch">
+            <div class="phone-header">
+              <span class="title">🎬 Happy Watch</span>
+              <span class="room-pill">Room #104</span>
             </div>
 
-            <div class="watch-video-container">
-              <div class="video-overlay">
-                <span class="video-title">Midnight Lo-Fi Campus Chill Session</span>
-                <span class="video-sync-badge">● IN SYNC (34 Spirits Watching)</span>
+            <div class="phone-content">
+              <div class="video-mock">
+                <div class="video-center-play">▶</div>
+                <div class="video-meta-bar">
+                  <span>Midnight Study Chill Session</span>
+                  <small>● Sync Active (18 Watching)</small>
+                </div>
               </div>
-              <div class="video-screen-mock">
-                <div class="play-pulse">▶</div>
-              </div>
-            </div>
 
-            <div class="watch-controls-bar">
-              <div class="progress-slider">
-                <div class="progress-fill" style="width: 45%;"></div>
+              <div class="watch-controls">
+                <div class="progress-track">
+                  <div class="progress-thumb" style="width: 42%;"></div>
+                </div>
+                <div class="time-row">
+                  <span>08:14</span>
+                  <span>19:30</span>
+                </div>
               </div>
-              <div class="time-label">
-                <span>09:20</span>
-                <span>21:15</span>
+
+              <div class="reaction-strip">
+                <span>Send Reaction:</span>
+                <button onclick="mockReaction('🔥')">🔥</button>
+                <button onclick="mockReaction('❤️')">❤️</button>
+                <button onclick="mockReaction('😂')">😂</button>
+                <button onclick="mockReaction('👻')">👻</button>
               </div>
-            </div>
 
-            <!-- Floating Reaction Triggers -->
-            <div class="watch-reactions">
-              <span>Send Reaction:</span>
-              <button onclick="spawnWatchReaction('😂')">😂</button>
-              <button onclick="spawnWatchReaction('❤️')">❤️</button>
-              <button onclick="spawnWatchReaction('🔥')">🔥</button>
-              <button onclick="spawnWatchReaction('👻')">👻</button>
-            </div>
-
-            <div class="spectator-list">
-              <span class="spec-tag">👻 Alex (Host)</span>
-              <span class="spec-tag">👻 Mia</span>
-              <span class="spec-tag">👻 Syd</span>
-              <span class="spec-tag">+31 more</span>
+              <div class="spectator-chips">
+                <span>👻 Alex (Host)</span>
+                <span>👻 Mia</span>
+                <span>👻 Syd</span>
+                <span>+15 more</span>
+              </div>
             </div>
           </div>
 
-          <!-- TAB 5: YEARBOOK & RESONANCE -->
-          <div class="phone-tab-pane" id="pane-yearbook">
-            <div class="phone-topbar">
-              <span class="app-logo">📖 YEARBOOK</span>
-              <span class="xp-badge">⚡ 14,850 XP</span>
+          <!-- SCREEN 5: YEARBOOK -->
+          <div class="phone-screen" id="screen-yearbook">
+            <div class="phone-header">
+              <span class="title">📖 Campus Yearbook</span>
+              <span class="pill-mini">Directory</span>
             </div>
 
-            <div class="resonance-rank-card glass">
-              <div class="rank-badge">👑</div>
-              <div class="rank-info">
-                <h4>VOID SOVEREIGN</h4>
-                <p>Spectral Rank Tier 4 • 42 Day Streak</p>
-                <div class="rank-progress">
-                  <div class="progress-bar" style="width: 82%;"></div>
+            <div class="phone-content">
+              <div class="yearbook-list">
+                <div class="spirit-row">
+                  <span class="ghost-circle" style="background: rgba(255, 135, 0, 0.2);">👻</span>
+                  <div class="spirit-meta">
+                    <strong>@NOVA_RISE</strong>
+                    <small>ICT • 34 Day Streak</small>
+                  </div>
+                  <span class="streak-badge">🔥 34</span>
+                </div>
+
+                <div class="spirit-row">
+                  <span class="ghost-circle" style="background: rgba(189, 0, 255, 0.2);">🔮</span>
+                  <div class="spirit-meta">
+                    <strong>@GEAR_SHIFT</strong>
+                    <small>Engineering • 42 Day Streak</small>
+                  </div>
+                  <span class="streak-badge">🔥 42</span>
+                </div>
+
+                <div class="spirit-row">
+                  <span class="ghost-circle" style="background: rgba(0, 255, 204, 0.2);">✨</span>
+                  <div class="spirit-meta">
+                    <strong>@PIXEL_PULSE</strong>
+                    <small>Design • 18 Day Streak</small>
+                  </div>
+                  <span class="streak-badge">🔥 18</span>
                 </div>
               </div>
             </div>
-
-            <div class="yearbook-grid">
-              <div class="spirit-card glass">
-                <div class="spirit-ghost" style="background:#FF8700;">👻</div>
-                <h5>@NOVA_RISE</h5>
-                <span class="dept-badge">ICT</span>
-                <small>🔥 31 Days</small>
-              </div>
-              <div class="spirit-card glass">
-                <div class="spirit-ghost" style="background:#9D4EDD;">🔮</div>
-                <h5>@GEAR_SHIFT</h5>
-                <span class="dept-badge">ENG</span>
-                <small>🔥 42 Days</small>
-              </div>
-              <div class="spirit-card glass">
-                <div class="spirit-ghost" style="background:#00F3FF;">✨</div>
-                <h5>@PIXEL_PULSE</h5>
-                <span class="dept-badge">DESIGN</span>
-                <small>🔥 18 Days</small>
-              </div>
-              <div class="spirit-card glass">
-                <div class="spirit-ghost" style="background:#FF007F;">💫</div>
-                <h5>@DATA_DRIFT</h5>
-                <span class="dept-badge">MGMT</span>
-                <small>🔥 29 Days</small>
-              </div>
-            </div>
           </div>
 
-          <!-- BOTTOM PHONE NAVIGATION -->
-          <nav class="phone-nav-bar">
-            <button class="phone-nav-item active" onclick="setSimulatorTab('feed')">
-              <span>👻</span>
+          <!-- Phone Bottom Navigation -->
+          <nav class="phone-nav">
+            <button class="phone-nav-btn active" onclick="switchPhoneTab('feed')">
+              <span>💬</span>
               <small>Feed</small>
             </button>
-            <button class="phone-nav-item" onclick="setSimulatorTab('seance')">
+            <button class="phone-nav-btn" onclick="switchPhoneTab('confessions')">
               <span>🕯️</span>
-              <small>Séance</small>
+              <small>Hauwa</small>
             </button>
-            <button class="phone-nav-item" onclick="setSimulatorTab('chat')">
-              <span>💬</span>
+            <button class="phone-nav-btn" onclick="switchPhoneTab('chat')">
+              <span>🔒</span>
               <small>Chat</small>
             </button>
-            <button class="phone-nav-item" onclick="setSimulatorTab('watch')">
+            <button class="phone-nav-btn" onclick="switchPhoneTab('watch')">
               <span>🎬</span>
               <small>Watch</small>
             </button>
-            <button class="phone-nav-item" onclick="setSimulatorTab('yearbook')">
+            <button class="phone-nav-btn" onclick="switchPhoneTab('yearbook')">
               <span>📖</span>
-              <small>Yearbook</small>
+              <small>Directory</small>
             </button>
           </nav>
 
@@ -523,272 +406,123 @@
     </div>
   </section>
 
-  <!-- ============================================== -->
-  <!-- SECTION: CORE ARCHITECTURE & FEATURE SHOWCASES -->
-  <!-- ============================================== -->
-  <section id="features" class="section-container">
-    <div class="section-header">
-      <span class="section-tag">ENGINEERING BREAKDOWN</span>
-      <h2 class="section-title">Built Different by Design</h2>
-      <p class="section-desc">Explore the signature features that made Ghosted the talk of the campus.</p>
+  <!-- Features Grid -->
+  <section id="features" class="section">
+    <div class="section-head">
+      <span class="subhead">HOW IT WORKED</span>
+      <h2>Core features built from scratch</h2>
+      <p>Everything designed around privacy, zero identity pressure, and student life.</p>
     </div>
 
     <div class="features-grid">
-      
-      <!-- Feature Card 1 -->
-      <div class="feature-card glass">
-        <div class="feature-icon">⏳</div>
-        <h3>The 24h Decay Matrix</h3>
-        <p>Whispers don't live forever. As posts age toward their 24-hour limit, Gaussian blur algorithms gradually fade the text and media until they dissolve into dust. Zero digital permanence.</p>
-        <ul class="feature-bullets">
-          <li>Adaptive optical text decay</li>
-          <li>Cloud Firestore TTL document auto-purging</li>
-          <li>Community Echo system to extend vital threads</li>
-        </ul>
+      <div class="feature-item">
+        <span class="f-icon">⏳</span>
+        <h3>24h Content Lifecycle</h3>
+        <p>Posts, chat bubbles, and stories expired after 24 hours. Optical blur applied as content aged, ensuring conversations stayed temporary and low-stakes.</p>
       </div>
 
-      <!-- Feature Card 2 -->
-      <div class="feature-card glass">
-        <div class="feature-icon">🕯️</div>
-        <h3>Séance & Hauwa Confessions</h3>
-        <p>A hidden portal accessible exclusively by tapping the Ghost glyph on mobile. Students uncover a sanctuary for heartfelt, wax-sealed confessions, sorted by categories with candle-lighting reactions.</p>
-        <ul class="feature-bullets">
-          <li>Custom digital wax seals & mood stamps</li>
-          <li>Category filtering (#crush, #exams, #hostel)</li>
-          <li>Anonymous comment resonance threads</li>
-        </ul>
+      <div class="feature-item">
+        <span class="f-icon">🕯️</span>
+        <h3>Hauwa Confession Board</h3>
+        <p>A separate section for student thoughts, hostel memories, and campus questions categorized by tags with candle lighting in place of public likes.</p>
       </div>
 
-      <!-- Feature Card 3 -->
-      <div class="feature-card glass">
-        <div class="feature-icon">🎬</div>
-        <h3>Happy Watch Synchronized Party</h3>
-        <p>Turned dorm rooms into synchronized cinemas. Watch YouTube videos, music premieres, or study playlists together with ultra-low latency playback sync and floating spectator reactions.</p>
-        <ul class="feature-bullets">
-          <li>Sub-50ms room state synchronizer</li>
-          <li>In-room live spectator reaction physics</li>
-          <li>Anonymous callsign participant roster</li>
-        </ul>
+      <div class="feature-item">
+        <span class="f-icon">🎬</span>
+        <h3>Happy Watch Cinema</h3>
+        <p>Students in different hostel rooms could join synchronized rooms to watch YouTube videos together with synchronized playhead states and live chat.</p>
       </div>
 
-      <!-- Feature Card 4 -->
-      <div class="feature-card glass">
-        <div class="feature-icon">💬</div>
-        <h3>Vapor Chat & View-Once Photos</h3>
-        <p>Direct & group chats where every message bubble is a vapor particle. Send encrypted view-once photos that self-destruct 5 seconds after inspection with no screenshot footprint.</p>
-        <ul class="feature-bullets">
-          <li>5-second self-destructing media viewer</li>
-          <li>Group chats with custom anonymous admin keys</li>
-          <li>Automatic midnight cleanup of chat trees</li>
-        </ul>
+      <div class="feature-item">
+        <span class="f-icon">🔒</span>
+        <h3>View-Once Media</h3>
+        <p>Media sent in temporary chats could be marked as view-once. Photos self-destructed 5 seconds after opening with zero cloud retention.</p>
       </div>
 
-      <!-- Feature Card 5 -->
-      <div class="feature-card glass">
-        <div class="feature-icon">📖</div>
-        <h3>Yearbook & Spectral Resonance</h3>
-        <p>Gamified anonymous identity. Earn Resonance XP by actively contributing to the campus void. Ascend the spectral hierarchy from humble Phantom to legendary Void Sovereign.</p>
-        <ul class="feature-bullets">
-          <li>Dynamic department badges (ICT, Design, Engg)</li>
-          <li>Daily login streak bonus resonance multipliers</li>
-          <li>Zero name or phone number linkages</li>
-        </ul>
+      <div class="feature-item">
+        <span class="f-icon">📖</span>
+        <h3>Department Yearbook</h3>
+        <p>Anonymized directory filtered by academic departments (ICT, Design, Engineering) allowing students to track active streaks without revealing identities.</p>
       </div>
 
-      <!-- Feature Card 6 -->
-      <div class="feature-card glass">
-        <div class="feature-icon">🎨</div>
-        <h3>Quad-Theme Dynamic Engine</h3>
-        <p>Engineered with 4 custom visual design languages: Ghosted Ember Orange, Cosmic Purple Nebula, Aurora Borealis Teal, and Graphic Novel Comic Panel.</p>
-        <ul class="feature-bullets">
-          <li>Instant runtime CSS / Canvas theme swap</li>
-          <li>Adaptive particle background simulations</li>
-          <li>Custom typography matching each mood</li>
-        </ul>
+      <div class="feature-item">
+        <span class="f-icon">🎨</span>
+        <h3>Custom Themes</h3>
+        <p>Multiple dynamic color themes: Ghosted Orange (Warm Ember), Cosmic Purple, Aurora Teal, and Comic Panel styles to personalize the mood.</p>
       </div>
-
     </div>
   </section>
 
-  <!-- ============================================== -->
-  <!-- SECTION: HIGH-RESOLUTION UI VISUALS GALLERY -->
-  <!-- ============================================== -->
-  <section id="visuals" class="section-container">
-    <div class="section-header">
-      <span class="section-tag">UI / UX ARCHIVE</span>
-      <h2 class="section-title">Visual Showcase Gallery</h2>
-      <p class="section-desc">Authentic UI renders from the production Flutter application.</p>
+  <!-- Tech Stack & Architecture -->
+  <section id="tech" class="section">
+    <div class="section-head">
+      <span class="subhead">UNDER THE HOOD</span>
+      <h2>Technologies used</h2>
     </div>
 
-    <div class="visuals-gallery">
-      
-      <!-- Visual Card 1: Seance -->
-      <div class="visual-card glass">
-        <div class="visual-img-wrap">
-          <img src="assets/seance_confessions.jpg" alt="Séance & Hauwa Confessions Screen" loading="lazy">
-        </div>
-        <div class="visual-info">
-          <h4>🕯️ Séance & Hauwa Confessions</h4>
-          <p>The wax-sealed sanctuary for campus secrets, midnight feelings, and anonymous resonance.</p>
-        </div>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <span class="t-badge">FRONTEND</span>
+        <h3>Flutter Web & Mobile (Dart)</h3>
+        <p>Single codebase delivering cross-platform performance, custom CanvasKit dark-mode UI, and reactive state management.</p>
       </div>
 
-      <!-- Visual Card 2: Happy Watch -->
-      <div class="visual-card glass">
-        <div class="visual-img-wrap">
-          <img src="assets/happy_watch.jpg" alt="Happy Watch Synchronized Party Screen" loading="lazy">
-        </div>
-        <div class="visual-info">
-          <h4>🎬 Happy Watch Synchronized Cinema</h4>
-          <p>Dorm cinema rooms with real-time video sync, live spectator chat, and floating reaction emojis.</p>
-        </div>
+      <div class="tech-card">
+        <span class="t-badge">DATABASE</span>
+        <h3>Cloud Firestore</h3>
+        <p>Real-time NoSQL database handling live feeds, direct chats, and synchronized room timestamps with sub-second listeners.</p>
       </div>
 
-      <!-- Visual Card 3: Yearbook -->
-      <div class="visual-card glass">
-        <div class="visual-img-wrap">
-          <img src="assets/yearbook_ranks.jpg" alt="Yearbook & Resonance Ranks Screen" loading="lazy">
-        </div>
-        <div class="visual-info">
-          <h4>📖 Campus Yearbook & Spectral Ranks</h4>
-          <p>Anonymous spirit profiles, department filters, and resonance progression ladders.</p>
-        </div>
+      <div class="tech-card">
+        <span class="t-badge">AUTHENTICATION</span>
+        <h3>Firebase Auth</h3>
+        <p>Domain verification locking access strictly to <code>@adaniuni.ac.in</code> campus accounts to keep the community local and authentic.</p>
       </div>
 
+      <div class="tech-card">
+        <span class="t-badge">MEDIA PIPELINE</span>
+        <h3>Cloudinary API</h3>
+        <p>Handled client-side image compression, automatic WebP generation, and responsive delivery for low-bandwidth mobile connections.</p>
+      </div>
     </div>
   </section>
 
-  <!-- ============================================== -->
-  <!-- SECTION: SYSTEM ARCHITECTURE & PRIVACY SHIELD -->
-  <!-- ============================================== -->
-  <section id="architecture" class="section-container">
-    <div class="section-header">
-      <span class="section-tag">UNDER THE HOOD</span>
-      <h2 class="section-title">Technical Architecture & Stack</h2>
-      <p class="section-desc">A modern, scalable cloud infrastructure tailored for high-speed campus ephemeral communication.</p>
+  <!-- First Project Reflections -->
+  <section id="learnings" class="section">
+    <div class="section-head">
+      <span class="subhead">REFLECTIONS</span>
+      <h2>What I learned from this first project</h2>
     </div>
 
-    <div class="arch-container glass">
-      
-      <div class="arch-columns">
-        <div class="arch-col">
-          <div class="arch-tag">FRONTEND LAYER</div>
-          <h4>Flutter Web & Mobile (Dart)</h4>
-          <p>Multi-platform client delivering 60 FPS smooth animations, responsive adaptive layouts, and custom canvas shader backgrounds.</p>
-          <div class="pill-group">
-            <span class="tech-pill">Flutter 3.x</span>
-            <span class="tech-pill">Dart</span>
-            <span class="tech-pill">Provider State</span>
-            <span class="tech-pill">CanvasKit</span>
-          </div>
-        </div>
-
-        <div class="arch-col">
-          <div class="arch-tag">DATABASE & AUTH</div>
-          <h4>Cloud Firestore & Firebase Auth</h4>
-          <p>Real-time document change listeners, security rule enforcement, domain-locked authentication (<code>@adaniuni.ac.in</code>), and offline persistence.</p>
-          <div class="pill-group">
-            <span class="tech-pill">Firestore NoSQL</span>
-            <span class="tech-pill">Firebase Auth</span>
-            <span class="tech-pill">Security Rules</span>
-            <span class="tech-pill">Hosting CDN</span>
-          </div>
-        </div>
-
-        <div class="arch-col">
-          <div class="arch-tag">MEDIA PIPELINE</div>
-          <h4>Cloudinary Media Acceleration</h4>
-          <p>Instant client-side image/video compression, WebP generation, secure upload signatures, and adaptive responsive thumbnail delivery.</p>
-          <div class="pill-group">
-            <span class="tech-pill">Cloudinary API</span>
-            <span class="tech-pill">WebP Compression</span>
-            <span class="tech-pill">TTL Cleanup</span>
-            <span class="tech-pill">CDN Edge</span>
-          </div>
-        </div>
+    <div class="learnings-card">
+      <div class="learning-point">
+        <h4>Managing Real-Time State</h4>
+        <p>Handling live Firestore listeners without causing unnecessary re-renders or exceeding free-tier document read quotas taught me how to architect efficient caching and data streams.</p>
       </div>
-
-      <div class="arch-privacy-box">
-        <div class="shield-icon">🛡️</div>
-        <div>
-          <h4>The Zero-Footprint Campus Privacy Shield</h4>
-          <p>To eliminate social anxiety and ensure genuine student safety, Ghosted was engineered without user tracking, phone number requirements, or permanent message stores. All content was strictly ephemeral with automated 24-hour document disposal.</p>
-        </div>
+      <div class="learning-point">
+        <h4>Ephemeral Data Cleanup</h4>
+        <p>Building a 24-hour expiration system required managing TTL timestamps and structuring queries so expired documents were filtered out instantly and cleaned up systematically.</p>
       </div>
-
+      <div class="learning-point">
+        <h4>Building for Real Campus Users</h4>
+        <p>Watching classmates actually use the app during exam weeks helped me see what worked and what was confusing, shaping how I approach user experience today.</p>
+      </div>
     </div>
   </section>
 
-  <!-- ============================================== -->
-  <!-- SECTION: MATTER.JS PHYSICS PLAYGROUND -->
-  <!-- ============================================== -->
-  <section id="physics" class="section-container">
-    <div class="section-header">
-      <span class="section-tag">PHYSICS SANDBOX</span>
-      <h2 class="section-title">Interactive Campus Tag Arena</h2>
-      <p class="section-desc">Powered by Matter.js 2D rigid-body engine. Drag, throw, and collide interest tags from the Ghosted matrix.</p>
-    </div>
-
-    <div class="physics-wrapper glass">
-      <div class="physics-bar">
-        <span>💡 Hint: Click anywhere inside to spawn new badges. Drag to fling them!</span>
-        <button class="btn-reset-arena" onclick="resetPhysicsArena()">Reset Arena</button>
-      </div>
-      <div id="physics-canvas-container"></div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="app-footer">
-    <div class="footer-top">
-      <div class="footer-brand">
-        <span class="footer-logo">👻 GHOSTED</span>
-        <p>The anonymous, high-fidelity university social network.</p>
+  <!-- Minimal Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <strong>Ghosted</strong> • First Full-Stack Project
+        <p>Built by <strong>Rudra Singh Rajput</strong> at Adani University</p>
       </div>
       <div class="footer-links">
-        <a href="https://github.com/Rudra-Singh-Rajput/ghosted" target="_blank">GitHub Repo</a>
-        <a href="https://ghosted-2c50e.web.app" target="_blank">Farewell Page</a>
-        <a href="#simulator">Live Simulator</a>
-        <a href="#architecture">Architecture</a>
+        <a href="https://github.com/Rudra-Singh-Rajput/Ghosted_Showcase" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://ghosted-2c50e.web.app" target="_blank" rel="noopener">Farewell Page</a>
       </div>
-    </div>
-
-    <div class="footer-bottom">
-      <p>Developed with passion by <strong>Rudra Singh Rajput</strong> • Adani University</p>
-      <p class="footer-subtext">Proprietary architecture • Showcase demonstration repository</p>
     </div>
   </footer>
-
-  <!-- Interactive Story Modal (hidden by default) -->
-  <div class="modal-backdrop" id="story-modal" onclick="closeStoryModal(event)">
-    <div class="story-modal-box glass" onclick="event.stopPropagation()">
-      <div class="story-progress-bar">
-        <div class="bar-fill"></div>
-      </div>
-      <div class="story-header">
-        <div class="story-author">
-          <span class="avatar">👻</span>
-          <div>
-            <strong>Ghost #9901</strong>
-            <small>ICT Dorms • 2h ago</small>
-          </div>
-        </div>
-        <button class="close-btn" onclick="closeStoryModal()">✕</button>
-      </div>
-      <div class="story-body">
-        <div class="story-floating-text">
-          "3 AM study break on the rooftop. Who else is up cramming for compilers?"
-        </div>
-        <div class="story-music-sticker">
-          <span>🎵</span> Synthwave Nostalgia • 01:24
-        </div>
-      </div>
-      <div class="story-footer">
-        <input type="text" placeholder="Send anonymous reply...">
-        <button onclick="closeStoryModal()">Send</button>
-      </div>
-    </div>
-  </div>
 
   <script src="app.js"></script>
 </body>

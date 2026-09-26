@@ -1,232 +1,20 @@
 // =========================================================
-// GHOSTED SHOWCASE & SIMULATOR JAVASCRIPT
-// Handles: Theme Engine, Simulator Mechanics, Canvas Starfield, Matter.js Arena
+// GHOSTED SHOWCASE — INTERACTIVE PHONE SIMULATOR
+// Minimal, clean, lightweight logic without external dependencies
 // =========================================================
 
-// --- 1. THEME ENGINE ---
-let currentTheme = 'ghosted';
-
-const themeConfigs = {
-  ghosted: {
-    name: 'Ghosted (Warm Ember)',
-    primary: '#FF8700',
-    secondary: '#BD00FF',
-    primaryRgb: '255, 135, 0',
-    dotClass: 'dot-ghosted'
-  },
-  cosmic: {
-    name: 'Cosmic (Nebula Purple)',
-    primary: '#BD00FF',
-    secondary: '#00F3FF',
-    primaryRgb: '189, 0, 255',
-    dotClass: 'dot-cosmic'
-  },
-  aurora: {
-    name: 'Aurora (Emerald Teal)',
-    primary: '#00FFCC',
-    secondary: '#0088FF',
-    primaryRgb: '0, 255, 204',
-    dotClass: 'dot-aurora'
-  },
-  comic: {
-    name: 'Comic (Graphic Halftone)',
-    primary: '#FFDE59',
-    secondary: '#FF5757',
-    primaryRgb: '255, 222, 89',
-    dotClass: 'dot-comic'
-  }
+const tabDescriptions = {
+  feed: "Whispers naturally fade over 24 hours to keep the board temporary. Tap 'Echo' to upvote or vote on the locked post to test.",
+  confessions: "Hauwa Confession Board: Students shared honest campus thoughts, exam anxieties, or hostel moments categorized by tags.",
+  chat: "Ephemeral Chat: All messages had a 24-hour TTL. Tap the View-Once message to see the 5-second self-destruct timer in action.",
+  watch: "Happy Watch: A synchronized video room where friends could watch videos together in sync with live chat and emoji reactions.",
+  yearbook: "Campus Yearbook: Anonymized student spirit profiles categorized by university department with daily active streaks."
 };
 
-const themeBtn = document.getElementById('theme-btn');
-const themeMenu = document.getElementById('theme-menu');
-
-if (themeBtn && themeMenu) {
-  themeBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    themeMenu.classList.toggle('show');
-  });
-
-  document.addEventListener('click', () => {
-    themeMenu.classList.remove('show');
-  });
-}
-
-function setTheme(name) {
-  if (!themeConfigs[name]) return;
-  currentTheme = name;
-  document.body.className = `theme-${name}`;
-
-  const config = themeConfigs[name];
-  const nameEl = document.querySelector('.theme-name');
-  if (nameEl) nameEl.textContent = config.name;
-
-  const dotEl = document.querySelector('.theme-color-dot');
-  if (dotEl) {
-    dotEl.style.background = config.primary;
-    dotEl.style.boxShadow = `0 0 8px ${config.primary}`;
-  }
-
-  document.querySelectorAll('.theme-opt').forEach(opt => {
-    if (opt.getAttribute('onclick').includes(name)) {
-      opt.classList.add('active');
-    } else {
-      opt.classList.remove('active');
-    }
-  });
-
-  if (themeMenu) themeMenu.classList.remove('show');
-  updatePhysicsColors();
-}
-
-// --- 2. STARFIELD & PARTICLE BACKGROUND CANVAS ---
-const fluidCanvas = document.getElementById('fluid-canvas');
-const fluidCtx = fluidCanvas.getContext('2d');
-let stars = [];
-const maxStars = 75;
-
-function resizeFluidCanvas() {
-  fluidCanvas.width = window.innerWidth;
-  fluidCanvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeFluidCanvas);
-resizeFluidCanvas();
-
-class StarParticle {
-  constructor() {
-    this.reset();
-    this.y = Math.random() * fluidCanvas.height;
-  }
-  reset() {
-    this.x = Math.random() * fluidCanvas.width;
-    this.y = fluidCanvas.height + 15;
-    this.size = Math.random() * 2.4 + 0.6;
-    this.speedY = Math.random() * 0.45 + 0.15;
-    this.amplitude = Math.random() * 1.8 + 0.4;
-    this.frequency = Math.random() * 0.005 + 0.001;
-    this.phase = Math.random() * 100;
-    this.alpha = Math.random() * 0.6 + 0.2;
-  }
-  update() {
-    this.y -= this.speedY;
-    this.phase += this.frequency;
-    this.x += Math.sin(this.phase) * this.amplitude * 0.3;
-    if (this.y < -15) this.reset();
-  }
-  draw() {
-    fluidCtx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-    fluidCtx.beginPath();
-    fluidCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    fluidCtx.fill();
-  }
-}
-
-for (let i = 0; i < maxStars; i++) {
-  stars.push(new StarParticle());
-}
-
-function animateFluidBackground() {
-  fluidCtx.clearRect(0, 0, fluidCanvas.width, fluidCanvas.height);
-  
-  for (let i = 0; i < stars.length; i++) {
-    stars[i].update();
-    stars[i].draw();
-
-    for (let j = i + 1; j < stars.length; j++) {
-      const dist = Math.hypot(stars[i].x - stars[j].x, stars[i].y - stars[j].y);
-      if (dist < 110) {
-        const alpha = (1 - dist / 110) * 0.12;
-        const config = themeConfigs[currentTheme];
-        const grad = fluidCtx.createLinearGradient(stars[i].x, stars[i].y, stars[j].x, stars[j].y);
-        grad.addColorStop(0, `rgba(${config.primaryRgb}, ${alpha})`);
-        grad.addColorStop(1, `rgba(255, 255, 255, ${alpha * 0.5})`);
-        
-        fluidCtx.strokeStyle = grad;
-        fluidCtx.lineWidth = 0.7;
-        fluidCtx.beginPath();
-        fluidCtx.moveTo(stars[i].x, stars[i].y);
-        fluidCtx.lineTo(stars[j].x, stars[j].y);
-        fluidCtx.stroke();
-      }
-    }
-  }
-  requestAnimationFrame(animateFluidBackground);
-}
-animateFluidBackground();
-
-// --- 3. INTERACTIVE SPARK BURST ENGINE ---
-const sparkCanvas = document.getElementById('spark-canvas');
-const sparkCtx = sparkCanvas.getContext('2d');
-let sparks = [];
-
-function resizeSparkCanvas() {
-  sparkCanvas.width = window.innerWidth;
-  sparkCanvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeSparkCanvas);
-resizeSparkCanvas();
-
-class Spark {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.size = Math.random() * 3 + 1.5;
-    this.speedX = Math.random() * 7 - 3.5;
-    this.speedY = Math.random() * -7 - 2;
-    this.gravity = 0.14;
-    const config = themeConfigs[currentTheme];
-    this.color = Math.random() > 0.4 ? config.primary : config.secondary;
-    this.alpha = 1.0;
-    this.decay = Math.random() * 0.02 + 0.012;
-  }
-  update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
-    this.speedY += this.gravity;
-    this.alpha -= this.decay;
-  }
-  draw() {
-    sparkCtx.save();
-    sparkCtx.globalAlpha = Math.max(0, this.alpha);
-    sparkCtx.fillStyle = this.color;
-    sparkCtx.shadowColor = this.color;
-    sparkCtx.shadowBlur = 10;
-    sparkCtx.beginPath();
-    sparkCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    sparkCtx.fill();
-    sparkCtx.restore();
-  }
-}
-
-function spawnBurst(x, y, count = 25) {
-  for (let i = 0; i < count; i++) {
-    sparks.push(new Spark(x, y));
-  }
-}
-
-function animateSparks() {
-  sparkCtx.clearRect(0, 0, sparkCanvas.width, sparkCanvas.height);
-  sparks = sparks.filter(s => s.alpha > 0);
-  for (let s of sparks) {
-    s.update();
-    s.draw();
-  }
-  requestAnimationFrame(animateSparks);
-}
-animateSparks();
-
-// --- 4. SMARTPHONE SIMULATOR LOGIC ---
-const hints = {
-  feed: "Whispers gradually blur and vaporize as their 24h decay countdown elapses. Tap 'Echo' or vote on locked payoffs to test.",
-  seance: "Accessible on mobile by tapping the Ghost icon. An encrypted altar where confessions are sealed in digital wax.",
-  chat: "Vapor Bubbles dissolve automatically. Tap the View-Once message to see the 5-second self-destruct timer in action!",
-  watch: "Happy Watch allows dorms to watch YouTube videos in frame-accurate sync. Click reactions to float emojis across the room.",
-  yearbook: "Student spirit profiles with department tags and resonance XP tiers. Level up from Phantom to Void Sovereign."
-};
-
-function setSimulatorTab(tabId) {
-  // Update sidebar controller buttons
-  document.querySelectorAll('.sim-nav-btn').forEach(btn => {
-    if (btn.getAttribute('onclick').includes(tabId)) {
+function switchPhoneTab(tabId) {
+  // Update sidebar selector buttons
+  document.querySelectorAll('.selector-btn').forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
       btn.classList.add('active');
     } else {
       btn.classList.remove('active');
@@ -234,327 +22,182 @@ function setSimulatorTab(tabId) {
   });
 
   // Update phone bottom nav buttons
-  document.querySelectorAll('.phone-nav-item').forEach(item => {
-    if (item.getAttribute('onclick').includes(tabId)) {
-      item.classList.add('active');
+  document.querySelectorAll('.phone-nav-btn').forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
+      btn.classList.add('active');
     } else {
-      item.classList.remove('active');
+      btn.classList.remove('active');
     }
   });
 
-  // Switch phone panes
-  document.querySelectorAll('.phone-tab-pane').forEach(pane => {
-    pane.classList.remove('active');
+  // Switch active phone screen
+  document.querySelectorAll('.phone-screen').forEach(screen => {
+    screen.classList.remove('active');
   });
-  const targetPane = document.getElementById(`pane-${tabId}`);
-  if (targetPane) targetPane.classList.add('active');
 
-  // Update explanation hint
-  const noteEl = document.getElementById('sim-feature-note');
-  if (noteEl && hints[tabId]) {
-    noteEl.textContent = hints[tabId];
+  const targetScreen = document.getElementById(`screen-${tabId}`);
+  if (targetScreen) {
+    targetScreen.classList.add('active');
+  }
+
+  // Update description text
+  const descEl = document.getElementById('feature-description');
+  if (descEl && tabDescriptions[tabId]) {
+    descEl.textContent = tabDescriptions[tabId];
   }
 }
 
-// SIMULATOR MICRO-INTERACTIONS
-function simEcho(btn, event) {
-  const countEl = btn.querySelector('.count');
-  let current = parseInt(countEl.textContent);
-  countEl.textContent = current + 1;
-  btn.style.color = themeConfigs[currentTheme].primary;
-  
-  const rect = btn.getBoundingClientRect();
-  spawnBurst(rect.left + rect.width / 2, rect.top + rect.height / 2, 20);
+// 1. Echo interaction
+function mockEcho(btn) {
+  const countEl = btn.querySelector('.echo-count');
+  if (countEl) {
+    let current = parseInt(countEl.textContent, 10);
+    countEl.textContent = current + 1;
+    btn.style.color = '#FF8700';
+  }
 }
 
-function simComment(btn) {
-  alert("💬 Comment Thread: Tap into anonymous replies. In the production app, users could comment without exposing any user handle!");
+function mockComment() {
+  alert("💬 Comment Thread: In the real app, classmates could reply anonymously to any whisper without revealing their identity.");
 }
 
-function simShare(event) {
-  spawnBurst(event.clientX, event.clientY, 15);
-  alert("🔗 Whisper link copied to clipboard!");
-}
+// 2. Locked Poll / Secret Payoff
+let pollVotes = 48;
+const pollGoal = 50;
 
-// Locked Payoff Mechanism
-let payoffVotes = 46;
-const payoffGoal = 50;
+function mockVote() {
+  if (pollVotes < pollGoal) {
+    pollVotes++;
+    const countEl = document.getElementById('vote-count');
+    const fillEl = document.getElementById('poll-fill');
+    const btn = document.getElementById('vote-btn');
 
-function votePayoff() {
-  if (payoffVotes < payoffGoal) {
-    payoffVotes++;
-    document.getElementById('payoff-counter').textContent = `${payoffVotes} / ${payoffGoal}`;
-    const percent = (payoffVotes / payoffGoal) * 100;
-    document.getElementById('demo-payoff-bar').style.width = `${percent}%`;
+    if (countEl) countEl.textContent = `${pollVotes} / ${pollGoal}`;
+    if (fillEl) fillEl.style.width = `${(pollVotes / pollGoal) * 100}%`;
 
-    if (payoffVotes >= payoffGoal) {
-      document.getElementById('demo-payoff-box').innerHTML = `
-        <div style="padding:10px; background:rgba(39, 201, 63, 0.15); border:1px solid #27C93F; border-radius:10px; text-align:center;">
-          <h5 style="color:#27C93F; font-size:0.85rem; margin-bottom:4px;">🔓 PAYOFF UNLOCKED!</h5>
-          <p style="font-size:0.75rem; color:#DDD;">"It was 3 professors celebrating getting their research grant approved! 🍕🎓"</p>
-        </div>
-      `;
+    if (pollVotes >= pollGoal) {
+      const pollBox = document.querySelector('.poll-box');
+      if (pollBox) {
+        pollBox.innerHTML = `
+          <div style="padding: 8px; background: rgba(39, 201, 63, 0.15); border: 1px solid #27C93F; border-radius: 6px; text-align: center;">
+            <strong style="color: #27C93F; font-size: 0.75rem; display: block;">🔓 Secret Unlocked!</strong>
+            <p style="font-size: 0.72rem; color: #DDD; margin-top: 2px;">"Three professors ordered 30 pizzas to celebrate a research grant! 🍕"</p>
+          </div>
+        `;
+      }
     }
   }
 }
 
-// View-Once Photo Self-Destruct Mechanic
-let viewOnceRevealed = false;
-function revealViewOncePhoto() {
-  if (viewOnceRevealed) return;
-  viewOnceRevealed = true;
+// 3. Confession alert
+function mockConfessAlert() {
+  alert("🕯️ Hauwa Board: Students could submit honest confessions with category tags (#Exams, #Hostel, #Crush) and lit candles replaced public likes.");
+}
 
-  const msg = document.getElementById('demo-view-once');
-  const status = document.getElementById('view-once-status');
-  
-  msg.innerHTML = `
-    <div style="padding: 10px; background: rgba(0,0,0,0.7); border-radius: 10px; text-align:center;">
-      <div style="font-size: 2rem; margin-bottom: 4px;">🖼️</div>
-      <p style="font-size: 0.75rem; color:#FFF; font-weight:700;">Secret Midterm Notes Photo</p>
-      <span id="destruct-countdown" style="font-size:0.7rem; color:#FF5555; font-weight:bold;">🔥 Destructing in 5s...</span>
+// 4. View-Once Self-Destruct
+let viewOnceTriggered = false;
+function mockViewOnce() {
+  if (viewOnceTriggered) return;
+  viewOnceTriggered = true;
+
+  const box = document.getElementById('view-once-box');
+  if (!box) return;
+
+  box.innerHTML = `
+    <div style="padding: 10px; background: rgba(0,0,0,0.6); border-radius: 8px; text-align: center;">
+      <span style="font-size: 1.5rem; display: block; margin-bottom: 4px;">📸</span>
+      <strong style="font-size: 0.75rem; color: #FFF; display: block;">Exam Study Notes Photo</strong>
+      <span id="countdown-timer" style="font-size: 0.7rem; color: #FF5555; font-weight: bold;">Self-destructing in 5s...</span>
     </div>
   `;
 
-  let seconds = 5;
+  let timeLeft = 5;
   const timer = setInterval(() => {
-    seconds--;
-    const countdownEl = document.getElementById('destruct-countdown');
-    if (countdownEl) {
-      countdownEl.textContent = `🔥 Destructing in ${seconds}s...`;
+    timeLeft--;
+    const timerEl = document.getElementById('countdown-timer');
+    if (timerEl) {
+      timerEl.textContent = `Self-destructing in ${timeLeft}s...`;
     }
-    if (seconds <= 0) {
+
+    if (timeLeft <= 0) {
       clearInterval(timer);
-      msg.innerHTML = `
-        <div style="padding: 10px; text-align:center; color:#777; font-size:0.75rem;">
-          <span>💨 Message vaporized into ash.</span>
+      box.innerHTML = `
+        <div style="padding: 8px; text-align: center; color: #666; font-size: 0.72rem;">
+          <span>💨 Photo deleted permanently.</span>
         </div>
       `;
-      msg.style.opacity = '0.5';
-      msg.style.pointerEvents = 'none';
+      box.style.opacity = '0.5';
+      box.style.pointerEvents = 'none';
     }
   }, 1000);
 }
 
-// Chat Mock Send
-function sendMockMessage() {
-  const input = document.getElementById('chat-input-box');
+// 5. Chat Send & Auto-Reply
+function mockSendChat() {
+  const input = document.getElementById('chat-box');
+  const stream = document.getElementById('chat-stream');
+  if (!input || !stream) return;
+
   const text = input.value.trim();
   if (!text) return;
 
-  const stream = document.getElementById('chat-stream');
-  
-  // User bubble
-  const userBubble = document.createElement('div');
-  userBubble.className = 'msg-bubble outgoing';
-  userBubble.innerHTML = `<p>${text}</p><small>Just now</small>`;
-  stream.appendChild(userBubble);
+  // Add outgoing bubble
+  const outBubble = document.createElement('div');
+  outBubble.className = 'chat-bubble outgoing';
+  outBubble.innerHTML = `<p>${escapeHtml(text)}</p><small>Just now</small>`;
+  stream.appendChild(outBubble);
   input.value = '';
-  stream.scrollTop = stream.scrollHeight;
 
-  // Bot auto-reply after 1 second
+  const chatContainer = document.querySelector('.chat-content');
+  if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+
+  // Auto-reply after 800ms
   setTimeout(() => {
     const replies = [
-      "Agreed, let's meet near the library atrium.",
-      "That whisper on the Ghost Board earlier was hilarious.",
-      "Did you check Happy Watch room #145 tonight?",
-      "Catch you later in the void!"
+      "Got it! See you in the library.",
+      "Check the Happy Watch room tonight, we're watching the tech keynote.",
+      "Totally agree with you.",
+      "Catch you later!"
     ];
     const replyText = replies[Math.floor(Math.random() * replies.length)];
-    const replyBubble = document.createElement('div');
-    replyBubble.className = 'msg-bubble incoming';
-    replyBubble.innerHTML = `<p>${replyText}</p><small>Just now</small>`;
-    stream.appendChild(replyBubble);
-    stream.scrollTop = stream.scrollHeight;
-  }, 900);
+    const inBubble = document.createElement('div');
+    inBubble.className = 'chat-bubble incoming';
+    inBubble.innerHTML = `<p>${replyText}</p><small>Just now</small>`;
+    stream.appendChild(inBubble);
+    if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+  }, 800);
 }
 
-// Happy Watch Floating Reactions
-function spawnWatchReaction(emoji) {
-  const container = document.querySelector('.watch-video-container');
+// 6. Floating Video Reactions
+function mockReaction(emoji) {
+  const container = document.querySelector('.video-mock');
   if (!container) return;
 
   const el = document.createElement('div');
   el.textContent = emoji;
   el.style.position = 'absolute';
   el.style.bottom = '15px';
-  el.style.left = `${Math.random() * 80 + 10}%`;
-  el.style.fontSize = '1.8rem';
+  el.style.left = `${Math.random() * 70 + 15}%`;
+  el.style.fontSize = '1.4rem';
   el.style.pointerEvents = 'none';
-  el.style.zIndex = '30';
-  el.style.transition = 'all 1.8s cubic-bezier(0.2, 0.8, 0.4, 1)';
+  el.style.zIndex = '20';
+  el.style.transition = 'all 1.4s cubic-bezier(0.2, 0.8, 0.4, 1)';
   el.style.opacity = '1';
 
   container.appendChild(el);
 
   setTimeout(() => {
-    el.style.transform = `translateY(-110px) scale(${Math.random() * 0.4 + 1.1})`;
+    el.style.transform = 'translateY(-70px) scale(1.2)';
     el.style.opacity = '0';
   }, 20);
 
   setTimeout(() => {
     el.remove();
-  }, 1800);
+  }, 1400);
 }
 
-// Story Modal
-function triggerStoryModal() {
-  const modal = document.getElementById('story-modal');
-  if (modal) modal.classList.add('show');
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
-
-function closeStoryModal(e) {
-  const modal = document.getElementById('story-modal');
-  if (modal) modal.classList.remove('show');
-}
-
-function openConfessionModal() {
-  alert("🕯️ The Sacred Confession Altar: In Ghosted, students could type any thought, pick a mood stamp (#crush, #exams, #faculty), and melt a digital wax seal before whispering it to campus.");
-}
-
-// --- 5. MATTER.JS PHYSICS PILLS ARENA ---
-let physicsEngine = null;
-let physicsRunner = null;
-let physicsBodies = [];
-
-function initPhysicsArena() {
-  const container = document.getElementById('physics-canvas-container');
-  if (!container || physicsEngine) return;
-
-  const width = container.clientWidth || 800;
-  const height = container.clientHeight || 440;
-
-  const Engine = Matter.Engine,
-        Render = Matter.Render,
-        Runner = Matter.Runner,
-        Bodies = Matter.Bodies,
-        Composite = Matter.Composite,
-        Mouse = Matter.Mouse,
-        MouseConstraint = Matter.MouseConstraint;
-
-  physicsEngine = Engine.create({ gravity: { y: 0.7 } });
-
-  const render = Render.create({
-    element: container,
-    engine: physicsEngine,
-    options: {
-      width: width,
-      height: height,
-      background: 'transparent',
-      wireframes: false,
-      showVelocity: false
-    }
-  });
-
-  Render.run(render);
-  physicsRunner = Runner.create();
-  Runner.run(physicsRunner, physicsEngine);
-
-  // Boundaries
-  const ground = Bodies.rectangle(width / 2, height + 25, width, 50, { isStatic: true });
-  const leftWall = Bodies.rectangle(-25, height / 2, 50, height, { isStatic: true });
-  const rightWall = Bodies.rectangle(width + 25, height / 2, 50, height, { isStatic: true });
-  Composite.add(physicsEngine.world, [ground, leftWall, rightWall]);
-
-  // Pill Labels
-  const tagLabels = [
-    "#ADANI_UNI", "#GHOSTED", "#SEANCE", "#HAPPY_WATCH",
-    "#ICT_MIDTERMS", "#VOID_SOVEREIGN", "#RESONANCE_XP",
-    "#LIBRARY_3RD_FLOOR", "#WAX_SEAL", "#CONFESSIONS",
-    "#VAPOR_BUBBLE", "#HOSTEL_NIGHTS", "#CAMPUS_VOICE"
-  ];
-
-  tagLabels.forEach((label, i) => {
-    const x = Math.random() * (width - 180) + 90;
-    const y = -50 - (i * 35);
-    const pill = Bodies.rectangle(x, y, 140, 42, {
-      chamfer: { radius: 21 },
-      restitution: 0.65,
-      friction: 0.1,
-      render: {
-        fillStyle: 'rgba(255, 255, 255, 0.04)',
-        strokeStyle: themeConfigs[currentTheme].primary,
-        lineWidth: 2
-      }
-    });
-    pill.tagLabel = label;
-    physicsBodies.push(pill);
-    Composite.add(physicsEngine.world, pill);
-  });
-
-  // Render text on bodies
-  Matter.Events.on(render, 'afterRender', () => {
-    const ctx = render.context;
-    ctx.font = 'bold 12px Outfit, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#FFFFFF';
-
-    physicsBodies.forEach(body => {
-      if (body.tagLabel) {
-        ctx.save();
-        ctx.translate(body.position.x, body.position.y);
-        ctx.rotate(body.angle);
-        ctx.fillText(body.tagLabel, 0, 0);
-        ctx.restore();
-      }
-    });
-  });
-
-  // Mouse Drag Constraint
-  const mouse = Mouse.create(render.canvas);
-  const mouseConstraint = MouseConstraint.create(physicsEngine, {
-    mouse: mouse,
-    constraint: {
-      stiffness: 0.25,
-      render: { visible: false }
-    }
-  });
-  Composite.add(physicsEngine.world, mouseConstraint);
-  render.mouse = mouse;
-
-  // Click to spawn
-  container.addEventListener('click', (e) => {
-    const rect = container.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // Spawn if not clicking a body
-    const extraPill = Bodies.rectangle(x, y, 120, 38, {
-      chamfer: { radius: 19 },
-      restitution: 0.7,
-      render: {
-        fillStyle: 'rgba(255, 255, 255, 0.06)',
-        strokeStyle: themeConfigs[currentTheme].secondary,
-        lineWidth: 2
-      }
-    });
-    extraPill.tagLabel = "#WHISPER";
-    physicsBodies.push(extraPill);
-    Composite.add(physicsEngine.world, extraPill);
-    spawnBurst(e.clientX, e.clientY, 15);
-  });
-}
-
-function updatePhysicsColors() {
-  if (!physicsBodies.length) return;
-  const config = themeConfigs[currentTheme];
-  physicsBodies.forEach((body, idx) => {
-    body.render.strokeStyle = idx % 2 === 0 ? config.primary : config.secondary;
-  });
-}
-
-function resetPhysicsArena() {
-  const container = document.getElementById('physics-canvas-container');
-  if (container) {
-    container.innerHTML = '';
-    physicsEngine = null;
-    physicsRunner = null;
-    physicsBodies = [];
-    initPhysicsArena();
-  }
-}
-
-// Initialize Physics Arena when scrolled near
-window.addEventListener('load', () => {
-  initPhysicsArena();
-});
