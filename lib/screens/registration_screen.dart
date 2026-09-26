@@ -63,8 +63,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       return;
     }
 
-    if (!email.endsWith('@adaniuni.ac.in')) {
-      setState(() => _errorMessage = "Only @adaniuni.ac.in emails allowed.");
+    if (!email.endsWith('@university.edu')) {
+      setState(() => _errorMessage = "Only @university.edu emails allowed.");
       return;
     }
 

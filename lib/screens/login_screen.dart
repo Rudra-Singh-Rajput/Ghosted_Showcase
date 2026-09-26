@@ -50,8 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
     
     print("LOGIN_DEBUG: raw='$rawEmail', isSpecial=$isSpecial");
 
-    if (!rawEmail.endsWith('@adaniuni.ac.in') && !isSpecial) {
-       _showError("Must be an @adaniuni.ac.in email.");
+    if (!rawEmail.endsWith('@university.edu') && !isSpecial) {
+       _showError("Must be an @university.edu email.");
        return;
     }
 
